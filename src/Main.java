@@ -1,6 +1,10 @@
+/**
+ * @author : Jay Acosta
+ */
+
 public class Main {
-    //I hope this can work
-    //did this work
+
+    // Runs the main program
     public static void main(String[] args) {
         Notepad notepad = new Notepad();
     }
