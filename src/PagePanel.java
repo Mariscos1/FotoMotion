@@ -3,7 +3,6 @@
 import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Line2D;
 
 /**
  * Handles User-Interface Interaction by using the Graphics
@@ -14,22 +13,22 @@ import java.awt.geom.Line2D;
 public class PagePanel extends JPanel implements MouseListener, MouseMotionListener{
 
     public PagePanel() {
-
+        setBackground(Color.WHITE);
+        setFocusable(true);
+        addMouseListener(this);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        System.out.println("Click!");
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
     }
 
     @Override
@@ -39,7 +38,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
