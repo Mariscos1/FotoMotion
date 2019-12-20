@@ -17,8 +17,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private final Color DEFAULT_COLOR = Color.BLACK;
     private Graphics2D g2;
 
-    private Color color;
-    private int strokeSize;
+    public static Color color;
+    public static int strokeSize;
     Point beginPoint;
     Point endPoint;
 

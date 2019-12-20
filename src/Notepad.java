@@ -87,15 +87,45 @@ public class Notepad extends JFrame {
         toolGrouper.add(new JButton("Brush"));
         toolGrouper.add(new JButton("Erase"));
 
+        // create a grouper for the size object chooser
+        // add all numbers from [4, 64) by increments of 4 as size options
         JCompGrouper sizeGrouper = new JCompGrouper("Size");
         JComboBox<Integer> sizes = new JComboBox<>();
-        for(int i = 4; i < 64; i+=4) {
+        for(int i = 4; i <= 64; i+=4) {
             sizes.addItem(i);
         }
+
+        // this action listener sets the page panel stroke size to the item at a given "size" index
+        sizes.addActionListener(e -> PagePanel.strokeSize = sizes.getItemAt(sizes.getSelectedIndex()));
         sizeGrouper.add(sizes);
+
+        // build the color component
+        JCompGrouper colorGrouper = new JCompGrouper("Color");
+
+        // add a color button that allows user to choose the color of their brush
+        JButton colorButton = new JButton(" ");
+        colorButton.setBackground(Color.BLACK); // set default color to black
+
+        // when color button is pressed, make the JColorChooser pop up
+        colorButton.addActionListener(e -> {
+
+            // get color from JColorChooser (parent is colorButton)
+            Color selectColor = JColorChooser.showDialog(colorButton, "Choose Brush color", colorButton.getBackground());
+
+            // set the background of the color button to the color selected
+            // change PagePanel's brush color to the selected color
+            colorButton.setBackground(selectColor);
+            PagePanel.color = selectColor;
+        });
+
+        colorGrouper.add(colorButton);
+
         // test.setBackground(ribbonPanel.getBackground());
+
+        // add the grouper s to the ribbon
         ribbon.add(toolGrouper);
         ribbon.add(sizeGrouper);
+        ribbon.add(colorGrouper);
     }
 
     private static class JCompGrouper extends JPanel {
