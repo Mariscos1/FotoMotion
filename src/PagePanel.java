@@ -9,9 +9,9 @@ import java.awt.geom.Line2D;
  * Handles User-Interface Interaction by using the Graphics
  * class and JPanel
  *
- * @author : Jay Acosta
+ * @author : Jay Acosta, Janlloyd Carangan
  */
-public class PagePanel extends JPanel implements MouseListener, MouseMotionListener{
+public class PagePanel extends JPanel implements MouseListener, MouseMotionListener {
 
     private final int DEFAULT_STROKE_SIZE = 10;
     private final Color DEFAULT_COLOR = Color.BLACK;
@@ -22,7 +22,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     Point beginPoint;
     Point endPoint;
 
-    public PagePanel(int strokeSize, Color color){
+    public PagePanel(int strokeSize, Color color) {
         this();
         this.strokeSize = strokeSize;
         this.color = color;
@@ -49,7 +49,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         beginPoint = e.getPoint();
 
         //places a dot wherever clicked
-        g2 = (Graphics2D)getGraphics();
+        g2 = (Graphics2D) getGraphics();
         g2.setColor(color);
         g2.fillOval(e.getX(), e.getY(), strokeSize, strokeSize);
     }
@@ -70,7 +70,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     @Override
     public void mouseDragged(MouseEvent e) {
         //sets up graphics2d object
-        g2 = (Graphics2D)getGraphics();
+        g2 = (Graphics2D) getGraphics();
         g2.setStroke(new BasicStroke(strokeSize));
         g2.setColor(color);
 
@@ -83,5 +83,21 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
+    }
+
+    public void undo() {
+
+    }
+
+    public void redo() {
+
+    }
+
+    public void changeBrushSize() {
+
+    }
+
+    public void changeBrushColor() {
+
     }
 }

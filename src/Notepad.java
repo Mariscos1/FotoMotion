@@ -1,7 +1,11 @@
 // imports
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Operates GUI for FotoMotion application
@@ -13,12 +17,15 @@ public class Notepad extends JFrame {
     private final String APP_NAME = "FotoMotion";
     public static final int HEIGHT = 500;
     public static final int WIDTH = 750;
+    private final int RIBBON_HEIGHT = 60;
+
+    private AnimationPanel anim;
 
     public Notepad() {
 
         // set the current properties for the initial notepad application
         setTitle(APP_NAME);
-        setSize(WIDTH, HEIGHT);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // setResizable(false);
         setLayout(new BorderLayout());
@@ -28,31 +35,33 @@ public class Notepad extends JFrame {
 
         // initialize the current menus for the toolbar
         JMenu fileMenu = new JMenu("File");
-        JMenu editMenu = new JMenu("Paint");
-        JMenu animateMenu = new JMenu("Animate");
+        JMenu editMenu = new JMenu("Edit");
 
         // set the menu options for any menus
         buildFileMenuOptions(fileMenu);
+        buildEditMenuOptions(editMenu);
 
         // add the menus to the menu bar
         navigationBar.add(fileMenu);
         navigationBar.add(editMenu);
-        navigationBar.add(animateMenu);
 
         // the ribbonPanel will contain all the tools necessary to animate
         JPanel ribbonPanel = new JPanel();
         buildRibbonOptions(ribbonPanel);
 
-        // create the main drawing panel
-        PagePanel drawingPanel = new PagePanel();
+        // create the main animation panel
+        anim = new AnimationPanel(WIDTH, HEIGHT - RIBBON_HEIGHT);
 
         // get the current content pane and add all components
         Container contentPane = getContentPane();
         contentPane.add(ribbonPanel, BorderLayout.NORTH);
-        contentPane.add(drawingPanel);
+        contentPane.add(anim);
 
         // set the current frame to visible and give the frame a menu bar
         setJMenuBar(navigationBar);
+
+        // pack the current JFrame to get preferred sizes and then make visible
+        pack();
         setVisible(true);
     }
 
@@ -66,8 +75,8 @@ public class Notepad extends JFrame {
         // add mnemonics (key-bindings for menu options)
 
         // show pop up dialog pop boxes saying that functionality is not ready yet
-        save.addActionListener(e -> JOptionPane.showMessageDialog(null, "Save has not been implemented"));
-        open.addActionListener(e -> JOptionPane.showMessageDialog(null, "Open has not been implemented"));
+        save.addActionListener(e -> Notepad.showErrorMessage("Save has not been implemented"));
+        open.addActionListener(e -> Notepad.showErrorMessage("Open has not been implemented"));
 
         // exit is selected
         exit.addActionListener(e -> System.exit(1));
@@ -78,9 +87,36 @@ public class Notepad extends JFrame {
         fileMenu.add(exit);
     }
 
-    private void buildRibbonOptions(JPanel ribbon) {
+    private void buildEditMenuOptions(JMenu editMenu) {
+        JMenuItem paint = new JMenuItem("Paint");
+        JMenuItem animate = new JMenuItem("Animate");
 
-        ribbon.setLayout(new FlowLayout(FlowLayout.LEFT));
+        paint.addActionListener(e -> ((CardLayout) parentRibbon.getLayout()).show(parentRibbon, "PAINT"));
+        animate.addActionListener(e -> ((CardLayout) parentRibbon.getLayout()).show(parentRibbon, "ANIMATE"));
+
+        editMenu.add(paint);
+        editMenu.add(animate);
+    }
+
+    private void buildRibbonOptions(JPanel ribbon) {
+        parentRibbon = ribbon;
+        parentRibbon.setLayout(new CardLayout());
+
+        JPanel paintRibbon = new JPanel();
+        buildPaintingRibbon(paintRibbon);
+
+        JPanel animateRibbon = new JPanel();
+        buildAnimateRibbon(animateRibbon);
+
+        ribbon.add(paintRibbon, "PAINT");
+        ribbon.add(animateRibbon, "ANIMATE");
+    }
+
+    private void buildPaintingRibbon(JPanel paintRibbon) {
+
+        // sets the size of the current paintRibbon and the current layout of the current paintRibbon
+        paintRibbon.setPreferredSize(new Dimension(WIDTH, RIBBON_HEIGHT));
+        paintRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // build all tool components
         JCompGrouper toolGrouper = new JCompGrouper("Tools");
@@ -88,7 +124,7 @@ public class Notepad extends JFrame {
         toolGrouper.add(new JButton("Erase"));
 
         // create a grouper for the size object chooser
-        // add all numbers from [4, 64) by increments of 4 as size options
+        // add all numbers from [4, 64] by increments of 4 as size options
         JCompGrouper sizeGrouper = new JCompGrouper("Size");
         JComboBox<Integer> sizes = new JComboBox<>();
         for(int i = 4; i <= 64; i+=4) {
@@ -122,10 +158,25 @@ public class Notepad extends JFrame {
 
         // test.setBackground(ribbonPanel.getBackground());
 
-        // add the grouper s to the ribbon
-        ribbon.add(toolGrouper);
-        ribbon.add(sizeGrouper);
-        ribbon.add(colorGrouper);
+        // add the grouper s to the paintRibbon
+        paintRibbon.add(toolGrouper);
+        paintRibbon.add(sizeGrouper);
+        paintRibbon.add(colorGrouper);
+    }
+
+    private void buildAnimateRibbon(JPanel animateRibbon) {
+        // sets the size of the current animateRibbon and the current layout of the current animateRibbon
+        animateRibbon.setPreferredSize(new Dimension(WIDTH, RIBBON_HEIGHT));
+        animateRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        // build all tool components
+        animateRibbon.add(new JButton("HI!"));
+    }
+
+    private JPanel parentRibbon;
+
+    public static void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
     }
 
     private static class JCompGrouper extends JPanel {
