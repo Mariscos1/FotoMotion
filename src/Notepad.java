@@ -63,6 +63,8 @@ public class Notepad extends JFrame {
         // pack the current JFrame to get preferred sizes and then make visible
         pack();
         setVisible(true);
+
+        anim.initDrawPanel();
     }
 
     private void buildFileMenuOptions(JMenu fileMenu) {
@@ -108,8 +110,8 @@ public class Notepad extends JFrame {
         JPanel animateRibbon = new JPanel();
         buildAnimateRibbon(animateRibbon);
 
-        ribbon.add(paintRibbon, "PAINT");
-        ribbon.add(animateRibbon, "ANIMATE");
+        parentRibbon.add(paintRibbon, "PAINT");
+        parentRibbon.add(animateRibbon, "ANIMATE");
     }
 
     private void buildPaintingRibbon(JPanel paintRibbon) {
@@ -170,7 +172,22 @@ public class Notepad extends JFrame {
         animateRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // build all tool components
-        animateRibbon.add(new JButton("HI!"));
+        JButton nextFrame = new JButton("Add Frame");
+
+        nextFrame.addActionListener(e -> anim.addNewPanel());
+
+        JCompGrouper navigation = new JCompGrouper("Navigation");
+        JButton prev = new JButton("Previous");
+        prev.addActionListener(e -> anim.backwardOneFrame());
+
+        JButton next = new JButton("Next");
+        next.addActionListener(e -> anim.forwardOneFrame());
+
+        navigation.add(prev);
+        navigation.add(next);
+
+        animateRibbon.add(nextFrame);
+        animateRibbon.add(navigation);
     }
 
     private JPanel parentRibbon;
@@ -191,7 +208,7 @@ public class Notepad extends JFrame {
             innerContainer.setLayout(new FlowLayout());
             super.add(innerContainer);
 
-            this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 2, Color.GRAY));
+            this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, Color.GRAY));
         }
 
         private JCompGrouper(String label) {

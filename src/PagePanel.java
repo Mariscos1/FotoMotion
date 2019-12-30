@@ -3,7 +3,6 @@
 import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Line2D;
 
 /**
  * Handles User-Interface Interaction by using the Graphics
@@ -13,29 +12,51 @@ import java.awt.geom.Line2D;
  */
 public class PagePanel extends JPanel implements MouseListener, MouseMotionListener {
 
-    private final int DEFAULT_STROKE_SIZE = 10;
-    private final Color DEFAULT_COLOR = Color.BLACK;
-    private Graphics2D g2;
+    private static final int DEFAULT_STROKE_SIZE = 4;
+    private static final Color DEFAULT_COLOR = Color.BLACK;
+    private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+    private Graphics2D g2BackBuffer;
 
+    public Color backgroundColor;
     public static Color color;
     public static int strokeSize;
-    Point beginPoint;
-    Point endPoint;
 
-    public PagePanel(int strokeSize, Color color) {
+    private int oldX, oldY, currentX, currentY;
+
+    private Image backBuffer;
+
+    public PagePanel(int strokeSize, Color color, Color backgroundColor) {
         this();
         this.strokeSize = strokeSize;
         this.color = color;
+        this.backgroundColor = backgroundColor;
     }
 
     public PagePanel() {
-        setBackground(Color.WHITE);
         setFocusable(true);
         addMouseListener(this);
         addMouseMotionListener(this);
 
         this.strokeSize = DEFAULT_STROKE_SIZE;
         this.color = DEFAULT_COLOR;
+        this.backgroundColor = DEFAULT_BACKGROUND_COLOR;
+    }
+
+    public void init(){
+        backBuffer = createVolatileImage(getWidth(), getHeight());
+        g2BackBuffer = (Graphics2D)backBuffer.getGraphics();
+
+        g2BackBuffer.setColor(backgroundColor);
+        g2BackBuffer.fillRect(0,0,getWidth(),getHeight());
+    }
+
+    //CAUTION
+    public void paintComponent(Graphics g){
+        super.paintComponent(g); //erases the panel
+        Graphics2D g2 = (Graphics2D)g;
+        if(backBuffer != null){
+            g2.drawImage(backBuffer, 0, 0, Color.WHITE, this);
+        }
     }
 
     @Override
@@ -46,12 +67,14 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     @Override
     public void mousePressed(MouseEvent e) {
         //gets begin point for mouseDragged shape
-        beginPoint = e.getPoint();
+        oldX = e.getX();
+        oldY = e.getY();
 
         //places a dot wherever clicked
-        g2 = (Graphics2D) getGraphics();
-        g2.setColor(color);
-        g2.fillOval(e.getX(), e.getY(), strokeSize, strokeSize);
+        g2BackBuffer.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2BackBuffer.setColor(color);
+        g2BackBuffer.fillOval(oldX - strokeSize/2, oldY - strokeSize/2, strokeSize, strokeSize);
+        repaint();
     }
 
     @Override
@@ -69,20 +92,39 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        //sets up graphics2d object
-        g2 = (Graphics2D) getGraphics();
-        g2.setStroke(new BasicStroke(strokeSize));
-        g2.setColor(color);
 
-        //draws the line
-        endPoint = e.getPoint();
-        Shape line = new Line2D.Double(beginPoint, endPoint);
-        g2.draw(line);
-        beginPoint = endPoint;
+        // g2.setStroke(new BasicStroke(strokeSize));
+        g2BackBuffer.setStroke(new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        g2BackBuffer.setColor(color);
+        g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        //draws lines with coordinates
+        currentX = e.getX();
+        currentY = e.getY();
+        g2BackBuffer.drawLine(oldX, oldY, currentX, currentY);
+        oldX = currentX;
+        oldY = currentY;
+        repaint();
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
+    }
+
+    public Image getCurrentImage() {
+        return backBuffer;
+    }
+
+    public void clearImage() {
+        init();
+        repaint();
+    }
+
+    public void setImage(Image image) {
+        clearImage();
+        backBuffer = image;
+        repaint();
     }
 
     public void undo() {
