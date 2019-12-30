@@ -19,6 +19,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     public Color backgroundColor;
     public static Color color;
+    public static Color brushColor;
     public static int strokeSize;
 
     private int oldX, oldY, currentX, currentY;
@@ -40,6 +41,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         this.strokeSize = DEFAULT_STROKE_SIZE;
         this.color = DEFAULT_COLOR;
         this.backgroundColor = DEFAULT_BACKGROUND_COLOR;
+        this.brushColor = color;
     }
 
     public void init(){
@@ -55,7 +57,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         super.paintComponent(g); //erases the panel
         Graphics2D g2 = (Graphics2D)g;
         if(backBuffer != null){
-            g2.drawImage(backBuffer, 0, 0, Color.WHITE, this);
+            g2.drawImage(backBuffer, 0, 0, DEFAULT_BACKGROUND_COLOR, this);
         }
     }
 
@@ -122,9 +124,17 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void setImage(Image image) {
-        clearImage();
         backBuffer = image;
+        g2BackBuffer = (Graphics2D) backBuffer.getGraphics();
         repaint();
+    }
+
+    public void erase(){
+        color = backgroundColor;
+    }
+
+    public void brush() {
+        color = brushColor;
     }
 
     public void undo() {

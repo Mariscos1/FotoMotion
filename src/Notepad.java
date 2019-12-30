@@ -45,12 +45,12 @@ public class Notepad extends JFrame {
         navigationBar.add(fileMenu);
         navigationBar.add(editMenu);
 
+        // create the main animation panel
+        anim = new AnimationPanel(WIDTH, HEIGHT - RIBBON_HEIGHT);
+
         // the ribbonPanel will contain all the tools necessary to animate
         JPanel ribbonPanel = new JPanel();
         buildRibbonOptions(ribbonPanel);
-
-        // create the main animation panel
-        anim = new AnimationPanel(WIDTH, HEIGHT - RIBBON_HEIGHT);
 
         // get the current content pane and add all components
         Container contentPane = getContentPane();
@@ -122,8 +122,15 @@ public class Notepad extends JFrame {
 
         // build all tool components
         JCompGrouper toolGrouper = new JCompGrouper("Tools");
-        toolGrouper.add(new JButton("Brush"));
-        toolGrouper.add(new JButton("Erase"));
+
+        JButton erase = new JButton("Erase");
+        erase.addActionListener(e -> anim.erase());
+
+        JButton brush = new JButton("Brush");
+        brush.addActionListener(e -> anim.brush());
+
+        toolGrouper.add(brush);
+        toolGrouper.add(erase);
 
         // create a grouper for the size object chooser
         // add all numbers from [4, 64] by increments of 4 as size options
@@ -154,6 +161,7 @@ public class Notepad extends JFrame {
             // change PagePanel's brush color to the selected color
             colorButton.setBackground(selectColor);
             PagePanel.color = selectColor;
+            PagePanel.brushColor = selectColor;
         });
 
         colorGrouper.add(colorButton);
@@ -172,9 +180,16 @@ public class Notepad extends JFrame {
         animateRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // build all tool components
-        JButton nextFrame = new JButton("Add Frame");
+        JCompGrouper frameAdders = new JCompGrouper("Frame");
 
-        nextFrame.addActionListener(e -> anim.addNewPanel());
+        JButton addFrame = new JButton("+");
+        addFrame.addActionListener(e -> anim.addPanel());
+
+        JButton removeFrame = new JButton("-");
+        removeFrame.addActionListener(e -> anim.removePanel());
+
+        frameAdders.add(addFrame);
+        frameAdders.add(removeFrame);
 
         JCompGrouper navigation = new JCompGrouper("Navigation");
         JButton prev = new JButton("Previous");
@@ -183,10 +198,22 @@ public class Notepad extends JFrame {
         JButton next = new JButton("Next");
         next.addActionListener(e -> anim.forwardOneFrame());
 
+        JComboBox<Integer> frameIndices = new JComboBox<>();
+        // frameIndices.addItem(1);
+        anim.setJComboBox(frameIndices);
+        frameIndices.addActionListener(e ->
+        {
+            if(frameIndices.getSelectedIndex() >= 0) {
+                anim.setCurrentFrame(frameIndices.getSelectedIndex());
+            }
+        });
+
+        navigation.add(frameIndices);
         navigation.add(prev);
         navigation.add(next);
 
-        animateRibbon.add(nextFrame);
+
+        animateRibbon.add(frameAdders);
         animateRibbon.add(navigation);
     }
 
