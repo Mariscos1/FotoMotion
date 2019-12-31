@@ -1,11 +1,9 @@
 // imports
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 /**
  * Operates GUI for FotoMotion application
@@ -17,9 +15,13 @@ public class Notepad extends JFrame {
     private final String APP_NAME = "FotoMotion";
     public static final int HEIGHT = 500;
     public static final int WIDTH = 750;
+    public static final Dimension BUTTON_DIMENSION = new Dimension(48, 32);
+
     private final int RIBBON_HEIGHT = 60;
 
     private AnimationPanel anim;
+
+    private JCompGrouper panelsGrouper;
 
     public Notepad() {
 
@@ -65,6 +67,7 @@ public class Notepad extends JFrame {
         setVisible(true);
 
         anim.initDrawPanel();
+        panelsGrouper.add(addPanel(0));
     }
 
     private void buildFileMenuOptions(JMenu fileMenu) {
@@ -93,11 +96,36 @@ public class Notepad extends JFrame {
         JMenuItem paint = new JMenuItem("Paint");
         JMenuItem animate = new JMenuItem("Animate");
 
+        paint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK));
+        animate.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
+
         paint.addActionListener(e -> ((CardLayout) parentRibbon.getLayout()).show(parentRibbon, "PAINT"));
         animate.addActionListener(e -> ((CardLayout) parentRibbon.getLayout()).show(parentRibbon, "ANIMATE"));
 
+        JMenuItem prev = new JMenuItem("Previous Frame");
+        JMenuItem next = new JMenuItem("Next Frame");
+        JMenuItem newFrame = new JMenuItem("New Frame");
+        JMenuItem removeFrame = new JMenuItem("Remove Frame");
+
+        prev.setAccelerator(KeyStroke.getKeyStroke("LEFT"));
+        next.setAccelerator(KeyStroke.getKeyStroke("RIGHT"));
+        newFrame.setAccelerator(KeyStroke.getKeyStroke('+'));
+        removeFrame.setAccelerator(KeyStroke.getKeyStroke('-'));
+
+        prev.addActionListener(e -> anim.backwardOneFrame());
+        next.addActionListener(e -> anim.forwardOneFrame());
+
+        newFrame.addActionListener(e -> add());
+        removeFrame.addActionListener(e -> remove());
+
         editMenu.add(paint);
         editMenu.add(animate);
+        editMenu.addSeparator();
+        editMenu.add(prev);
+        editMenu.add(next);
+        editMenu.addSeparator();
+        editMenu.add(newFrame);
+        editMenu.add(removeFrame);
     }
 
     private void buildRibbonOptions(JPanel ribbon) {
@@ -123,14 +151,22 @@ public class Notepad extends JFrame {
         // build all tool components
         JCompGrouper toolGrouper = new JCompGrouper("Tools");
 
+        JCheckBox seePrevBox = new JCheckBox("Opaque Panel");
+        seePrevBox.addActionListener(e -> anim.seeOpaque(seePrevBox));
+
         JButton erase = new JButton("Erase");
         erase.addActionListener(e -> anim.erase());
 
         JButton brush = new JButton("Brush");
         brush.addActionListener(e -> anim.brush());
 
+        JButton clearPage = new JButton("Clear");
+        clearPage.addActionListener(e -> anim.clearPage());
+
+        //toolGrouper.add(seePrevBox);
         toolGrouper.add(brush);
         toolGrouper.add(erase);
+        toolGrouper.add(clearPage);
 
         // create a grouper for the size object chooser
         // add all numbers from [4, 64] by increments of 4 as size options
@@ -183,19 +219,19 @@ public class Notepad extends JFrame {
         JCompGrouper frameAdders = new JCompGrouper("Frame");
 
         JButton addFrame = new JButton("+");
-        addFrame.addActionListener(e -> anim.addPanel());
+        addFrame.addActionListener(e -> add());
 
         JButton removeFrame = new JButton("-");
-        removeFrame.addActionListener(e -> anim.removePanel());
+        removeFrame.addActionListener(e -> remove());
 
         frameAdders.add(addFrame);
         frameAdders.add(removeFrame);
 
         JCompGrouper navigation = new JCompGrouper("Navigation");
-        JButton prev = new JButton("Previous");
+        JButton prev = new JButton("<-");
         prev.addActionListener(e -> anim.backwardOneFrame());
 
-        JButton next = new JButton("Next");
+        JButton next = new JButton("->");
         next.addActionListener(e -> anim.forwardOneFrame());
 
         JComboBox<Integer> frameIndices = new JComboBox<>();
@@ -212,9 +248,58 @@ public class Notepad extends JFrame {
         navigation.add(prev);
         navigation.add(next);
 
+        JCompGrouper animGrouper = new JCompGrouper("Animation");
+
+        JButton animateButton = new JButton("Play");
+        animateButton.addActionListener(e -> anim.play());
+
+        JCheckBox loopButton = new JCheckBox("Loop");
+        animateButton.addActionListener(e -> anim.setLooping(loopButton.isSelected()));
+
+        JButton stopButton = new JButton("Stop");
+        stopButton.addActionListener(e -> anim.stop());
+
+        JComboBox<Integer> fpsBox = new JComboBox<>();
+        for (int i = 0; i < 60; i++) {
+            fpsBox.addItem((i + 1));
+        }
+
+        fpsBox.addActionListener(e -> anim.setFPS((Integer) fpsBox.getSelectedItem()));
+
+        animGrouper.add(fpsBox);
+        animGrouper.add(animateButton);
+        animGrouper.add(loopButton);
+        animGrouper.add(stopButton);
+
+        panelsGrouper = new JCompGrouper("Panels");
 
         animateRibbon.add(frameAdders);
         animateRibbon.add(navigation);
+        animateRibbon.add(animGrouper);
+        // animateRibbon.add(panelsGrouper);
+    }
+
+    private JButton addPanel(int index){
+        JButton panel = new JButton();
+
+        panel.setPreferredSize(BUTTON_DIMENSION);
+
+        if(anim.framesLength() > 0) {
+            panel.setIcon(new ImageIcon(anim.getImage(index)));
+        }
+
+        panel.addActionListener(e -> anim.setCurrentFrame(panelsGrouper.getIndexAt(panel)));
+        return panel;
+    }
+
+    private void add() {
+        anim.addPanel();
+        panelsGrouper.add(addPanel(anim.getCurrentIndex()));
+    }
+
+    private void remove() {
+        anim.removePanel();
+        panelsGrouper.remove(anim.getCurrentIndex());
     }
 
     private JPanel parentRibbon;
@@ -265,6 +350,22 @@ public class Notepad extends JFrame {
 
             // add the component to the inner container
             return innerContainer.add(component);
+        }
+
+        public void remove(int currentIndex) {
+            innerContainer.remove(currentIndex);
+        }
+
+        public int getIndexAt(Component other) {
+            int index = -1;
+
+            for(Component comp: innerContainer.getComponents()) {
+                index++;
+                if(comp.equals(other))
+                    return index;
+            }
+
+            return index;
         }
     }
 }

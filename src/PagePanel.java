@@ -3,6 +3,8 @@
 import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 
 /**
  * Handles User-Interface Interaction by using the Graphics
@@ -25,6 +27,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private int oldX, oldY, currentX, currentY;
 
     private Image backBuffer;
+    private Image prevImage;
 
     public PagePanel(int strokeSize, Color color, Color backgroundColor) {
         this();
@@ -56,14 +59,15 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void paintComponent(Graphics g){
         super.paintComponent(g); //erases the panel
         Graphics2D g2 = (Graphics2D)g;
+
         if(backBuffer != null){
-            g2.drawImage(backBuffer, 0, 0, DEFAULT_BACKGROUND_COLOR, this);
+            g2.drawImage(backBuffer, 0, 0, null);
         }
     }
 
+
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println("Click!");
     }
 
     @Override
@@ -118,6 +122,16 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         return backBuffer;
     }
 
+    public void setPrevImage(Image newImage) {
+        prevImage = newImage;
+        repaint();
+    }
+
+    public void removePrevImage(){
+        prevImage = null;
+        repaint();
+    }
+
     public void clearImage() {
         init();
         repaint();
@@ -137,6 +151,12 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         color = brushColor;
     }
 
+    public void deletePage(){
+        g2BackBuffer.setColor(backgroundColor);
+        g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
+        repaint();
+    }
+
     public void undo() {
 
     }
@@ -152,4 +172,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void changeBrushColor() {
 
     }
+
+
 }
