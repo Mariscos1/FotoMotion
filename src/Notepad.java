@@ -218,12 +218,16 @@ public class Notepad extends JFrame {
         // build all tool components
         JCompGrouper frameAdders = new JCompGrouper("Frame");
 
+        JCheckBox shadowBox = new JCheckBox("Shadow");
+        shadowBox.addActionListener(e -> anim.showShadow(shadowBox.isSelected()));
+
         JButton addFrame = new JButton("+");
         addFrame.addActionListener(e -> add());
 
         JButton removeFrame = new JButton("-");
         removeFrame.addActionListener(e -> remove());
 
+        frameAdders.add(shadowBox);
         frameAdders.add(addFrame);
         frameAdders.add(removeFrame);
 

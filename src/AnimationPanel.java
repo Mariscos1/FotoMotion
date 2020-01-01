@@ -2,8 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,11 +59,17 @@ public class AnimationPanel extends JPanel {
 
     public void addPanel() {
 
+        // update the frame option box
         frameIndices.addItem(frames.size() + 1);
 
+        // set the current frame to the current image at the current index
         frames.set(currentIndex, currentPanel.getCurrentImage());
+        // currentPanel.setPrevImage(currentPanel.getCurrentImage());
+
+        // add frame clear the current panel and add another frame by incrementing the index
         currentPanel.clearImage();
         frames.add(++currentIndex, currentPanel.getCurrentImage());
+
         updateBoxNum();
     }
 
@@ -94,7 +98,8 @@ public class AnimationPanel extends JPanel {
 
     public void forwardOneFrame() {
         if (currentIndex < frames.size() - 1) {
-            currentPanel.setImage(frames.get(++currentIndex));
+            // currentPanel.setImage(frames.get(++currentIndex));
+            setCurrentFrame(++currentIndex);
         }
         // System.out.println("Index: " + currentIndex);
         updateBoxNum();
@@ -103,7 +108,8 @@ public class AnimationPanel extends JPanel {
 
     public void backwardOneFrame() {
         if (currentIndex > 0) {
-            currentPanel.setImage(frames.get(--currentIndex));
+            // currentPanel.setImage(frames.get(--currentIndex));
+            setCurrentFrame(--currentIndex);
         }
         updateBoxNum();
 
@@ -118,10 +124,6 @@ public class AnimationPanel extends JPanel {
         frameIndices = other;
     }
 
-    public Image getCurrentImage() {
-        return frames.get(currentIndex);
-    }
-
     public int getCurrentIndex() {
         return currentIndex;
     }
@@ -130,6 +132,11 @@ public class AnimationPanel extends JPanel {
         if (!removing) {
             currentIndex = newIndex;
             currentPanel.setImage(frames.get(currentIndex));
+
+            if(currentIndex - 1 >= 0) {
+                currentPanel.setPrevImage(frames.get(currentIndex - 1));
+            }
+
             updateBoxNum();
         }
     }
@@ -179,16 +186,14 @@ public class AnimationPanel extends JPanel {
         return frames.size();
     }
 
-    public Image getScaledImage(Image other){
-
-        Image cool = other.getScaledInstance(48, 32, Image.SCALE_SMOOTH);
-        return cool;
-    }
-
     public Image getImage(int index){
         if(frames.size() > 0)
             return frames.get(index);
         return null;
+    }
+
+    public void showShadow(boolean show) {
+        currentPanel.showShadow(show);
     }
 
     private class AnimationTask implements ActionListener {
