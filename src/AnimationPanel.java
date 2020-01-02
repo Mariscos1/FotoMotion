@@ -194,6 +194,7 @@ public class AnimationPanel extends JPanel {
 
     public void showShadow(boolean show) {
         currentPanel.showShadow(show);
+        setCurrentFrame(currentIndex);
     }
 
     private class AnimationTask implements ActionListener {
