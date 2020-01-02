@@ -5,7 +5,7 @@ public class JCompGrouper extends JPanel {
 
     private JPanel innerContainer = new JPanel();
 
-    private JCompGrouper() {
+    public JCompGrouper() {
         // set the current layout as a border layout
         setLayout(new BorderLayout());
 
@@ -59,5 +59,13 @@ public class JCompGrouper extends JPanel {
         }
 
         return index;
+    }
+
+    public void removeAll(){
+        innerContainer.removeAll();
+    }
+
+    public Component getComponentAt(int index) {
+        return innerContainer.getComponent(index);
     }
 }

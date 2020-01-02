@@ -15,7 +15,7 @@ import java.awt.image.VolatileImage;
 public class PagePanel extends JPanel implements MouseListener, MouseMotionListener {
 
     // class constants
-    private final int DEFAULT_STROKE_SIZE = 4;
+    private final int DEFAULT_STROKE_SIZE = 16;
     private final Color DEFAULT_COLOR = Color.BLACK;
     private final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
     private final float SHADOW_TRANSPARENCY = .25f; // should be from [0, 1] where 0 is opaque
@@ -93,7 +93,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         }
 
         if (showShadow && prevImage != null) {
-            drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
+            g2.drawImage(prevImage, 0, 0, getWidth(), getHeight(), null);
+            //drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
         }
     }
 
@@ -118,6 +119,38 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
                 }
             }
         }
+    }
+
+    // draws a translucent version of "image" onto the graphics object
+    private BufferedImage makeTranslucentImage(BufferedImage image) {
+
+        BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        // loop through all pixels in the buffered image
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+
+                // if the current part of the image is not the background color...
+                if (image.getRGB(x, y) != backgroundColor.getRGB()) {
+
+                    Color oldColor = new Color(image.getRGB(x, y));
+                    Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(),(int)(SHADOW_TRANSPARENCY*255));
+
+                    result.setRGB(x, y, newColor.getRGB());
+
+//                    // ... set the graphics color to the RGB value
+//                    result.setColor(new Color(image.getRGB(x, y)));
+//
+//                    // set the alpha
+//                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, SHADOW_TRANSPARENCY));
+//
+//                    // draw the pixel as a 1 x 1 filled rectangle
+//                    graphics.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -212,7 +245,17 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void setPrevImage(Image newImage) {
-        prevImage = newImage;
+
+        BufferedImage temp;
+        if(newImage instanceof VolatileImage) {
+            temp = ((VolatileImage) newImage).getSnapshot();
+        } else if (newImage instanceof BufferedImage) {
+            temp = (BufferedImage) newImage;
+        } else {
+            throw new IllegalArgumentException("Fuck");
+        }
+
+        prevImage = makeTranslucentImage(temp);
         repaint();
     }
 

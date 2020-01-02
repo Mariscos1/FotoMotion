@@ -71,7 +71,7 @@ public class AnimationPanel extends JPanel {
 
         // add frame image to the list and drop down index menu
         frames.add(currentPanel.getCurrentImage());
-        frameIndices.addItem(frames.size());
+         frameIndices.addItem(frames.size());
     }
 
     /*
@@ -91,7 +91,7 @@ public class AnimationPanel extends JPanel {
         currentPanel.clearImage();
         frames.add(++currentIndex, currentPanel.getCurrentImage());
 
-        updateBoxNum(); // update index drop down
+         updateBoxNum(); // update index drop down
     }
 
     public void removePanel() {
@@ -117,6 +117,14 @@ public class AnimationPanel extends JPanel {
             // set the current frame to the current index
             setCurrentFrame(currentIndex);
         }
+    }
+
+    public void removeAllPanels() {
+        for (int i = frames.size() - 1; i >= 0; i--) {
+            setCurrentFrame(i);
+            removePanel();
+        }
+        clearPage();
     }
 
     private void resetIndices() {
@@ -178,6 +186,7 @@ public class AnimationPanel extends JPanel {
     public Image getImage(int index) {
         if (frames.size() > 0)
             return frames.get(index);
+        System.out.println("returning null");
         return null;
     }
 
@@ -215,6 +224,13 @@ public class AnimationPanel extends JPanel {
 
     public void clearPage() {
         currentPanel.clearPage();
+    }
+
+    public void clearAll() {
+        for (int i = frames.size() - 1; i >= 0; i--) {
+            setCurrentFrame(i);
+            clearPage();
+        }
     }
 
     public void showShadow(boolean show) {

@@ -69,7 +69,7 @@ public class Notepad extends JFrame {
         setVisible(true);
 
         anim.initDrawPanel();
-        panelsGrouper.add(addPanel(0));
+        panelsGrouper.add(addPanel());
     }
 
     private void buildFileMenuOptions(JMenu fileMenu) {
@@ -114,8 +114,8 @@ public class Notepad extends JFrame {
         newFrame.setAccelerator(KeyStroke.getKeyStroke('+'));
         removeFrame.setAccelerator(KeyStroke.getKeyStroke('-'));
 
-        prev.addActionListener(e -> anim.backwardOneFrame());
-        next.addActionListener(e -> anim.forwardOneFrame());
+        prev.addActionListener(e -> backwardOneFrame());
+        next.addActionListener(e -> forwardOneFrame());
 
         newFrame.addActionListener(e -> add());
         removeFrame.addActionListener(e -> remove());
@@ -162,9 +162,13 @@ public class Notepad extends JFrame {
         JButton clearPage = new JButton("Clear");
         clearPage.addActionListener(e -> anim.clearPage());
 
+        JButton clearAll = new JButton("Clear All");
+        clearAll.addActionListener(e -> anim.clearAll());
+
         toolGrouper.add(brush);
         toolGrouper.add(erase);
         toolGrouper.add(clearPage);
+        toolGrouper.add(clearAll);
 
         // create a grouper for the size object chooser
         // add all numbers from [4, 64] by increments of 4 as size options
@@ -173,6 +177,7 @@ public class Notepad extends JFrame {
         for (int i = 4; i <= 64; i += 4) {
             sizes.addItem(i);
         }
+        sizes.setSelectedIndex(3);
 
         // this action listener sets the page panel stroke size to the item at a given "size" index
         sizes.addActionListener(e -> anim.setBrushSize((Integer) sizes.getSelectedItem()));
@@ -191,10 +196,12 @@ public class Notepad extends JFrame {
             // get color from JColorChooser (parent is colorButton)
             Color selectColor = JColorChooser.showDialog(colorButton, "Choose Brush color", colorButton.getBackground());
 
-            // set the background of the color button to the color selected
-            // change PagePanel's brush color to the selected color
-            colorButton.setBackground(selectColor);
-            anim.setBrushColor(selectColor);
+            if (selectColor != null) {
+                // set the background of the color button to the color selected
+                // change PagePanel's brush color to the selected color
+                colorButton.setBackground(selectColor);
+                anim.setBrushColor(selectColor);
+            }
         });
 
         colorGrouper.add(colorButton);
@@ -224,13 +231,17 @@ public class Notepad extends JFrame {
         JButton removeFrame = new JButton("-");
         removeFrame.addActionListener(e -> remove());
 
+        JButton removeAll = new JButton("=");
+        removeAll.addActionListener(e -> removeAllPanels());
+
         frameAdders.add(shadowBox);
         frameAdders.add(addFrame);
         frameAdders.add(removeFrame);
+        frameAdders.add(removeAll);
 
         JCompGrouper navigation = new JCompGrouper("Navigation");
         JButton prev = new JButton("<-");
-        prev.addActionListener(e -> anim.backwardOneFrame());
+        prev.addActionListener(e -> backwardOneFrame());
 
         JButton next = new JButton("->");
         next.addActionListener(e -> anim.forwardOneFrame());
@@ -282,36 +293,62 @@ public class Notepad extends JFrame {
         animGrouper.add(loopButton);
         animGrouper.add(stopButton);
 
-        panelsGrouper = new JCompGrouper("Panels");
+        panelsGrouper = new JCompGrouper();
+        JScrollPane windowPain = new JScrollPane(panelsGrouper, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        windowPain.setPreferredSize(new Dimension(200, RIBBON_HEIGHT));
+        windowPain.setFocusable(false);
 
         animateRibbon.add(frameAdders);
-        animateRibbon.add(navigation);
+         animateRibbon.add(navigation);
         animateRibbon.add(animGrouper);
-        // animateRibbon.add(panelsGrouper);
+        animateRibbon.add(windowPain);
     }
 
-    private JButton addPanel(int index) {
-        JButton panel = new JButton();
+    private void backwardOneFrame() {
+        panelsGrouper.getComponentAt(anim.getCurrentIndex()).repaint();
+        anim.backwardOneFrame();
+    }
+
+    private void forwardOneFrame() {
+        panelsGrouper.getComponentAt(anim.getCurrentIndex()).repaint();
+        anim.forwardOneFrame();
+    }
+
+    private void removeAllPanels(){
+        anim.removeAllPanels();
+        panelsGrouper.removeAll();
+        panelsGrouper.add(addPanel());
+    }
+
+    private JButton addPanel() {
+        JButton panel = new MyButton();
+        panel.setFocusable(false);
 
         panel.setPreferredSize(BUTTON_DIMENSION);
 
-        if (anim.framesLength() > 0) {
-            panel.setIcon(new ImageIcon(anim.getImage(index)));
-        }
-
         panel.addActionListener(e -> anim.setCurrentFrame(panelsGrouper.getIndexAt(panel)));
+
+        revalidate();
         return panel;
+    }
+
+    private class MyButton extends JButton {
+        public void paintComponent(Graphics g) {
+            g.drawImage(anim.getImage(panelsGrouper.getIndexAt(this)), 0, 0, getWidth(), getHeight(), null);
+        }
     }
 
     private void add() {
         anim.addPanel();
-        panelsGrouper.add(addPanel(anim.getCurrentIndex()));
+        panelsGrouper.add(addPanel());
     }
 
     private void remove() {
+        panelsGrouper.remove(anim.getCurrentIndex());
         anim.removePanel();
-        // panelsGrouper.remove(anim.getCurrentIndex());
+
     }
+
 
     public static void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
