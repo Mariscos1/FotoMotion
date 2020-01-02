@@ -19,6 +19,8 @@ public class Notepad extends JFrame {
 
     private final int RIBBON_HEIGHT = 60;
 
+    private JPanel parentRibbon;
+
     private AnimationPanel anim;
 
     private JCompGrouper panelsGrouper;
@@ -151,9 +153,6 @@ public class Notepad extends JFrame {
         // build all tool components
         JCompGrouper toolGrouper = new JCompGrouper("Tools");
 
-        JCheckBox seePrevBox = new JCheckBox("Opaque Panel");
-        seePrevBox.addActionListener(e -> anim.seeOpaque(seePrevBox));
-
         JButton erase = new JButton("Erase");
         erase.addActionListener(e -> anim.erase());
 
@@ -163,7 +162,6 @@ public class Notepad extends JFrame {
         JButton clearPage = new JButton("Clear");
         clearPage.addActionListener(e -> anim.clearPage());
 
-        //toolGrouper.add(seePrevBox);
         toolGrouper.add(brush);
         toolGrouper.add(erase);
         toolGrouper.add(clearPage);
@@ -172,12 +170,12 @@ public class Notepad extends JFrame {
         // add all numbers from [4, 64] by increments of 4 as size options
         JCompGrouper sizeGrouper = new JCompGrouper("Size");
         JComboBox<Integer> sizes = new JComboBox<>();
-        for(int i = 4; i <= 64; i+=4) {
+        for (int i = 4; i <= 64; i += 4) {
             sizes.addItem(i);
         }
 
         // this action listener sets the page panel stroke size to the item at a given "size" index
-        sizes.addActionListener(e -> PagePanel.strokeSize = sizes.getItemAt(sizes.getSelectedIndex()));
+        sizes.addActionListener(e -> anim.setBrushSize((Integer) sizes.getSelectedItem()));
         sizeGrouper.add(sizes);
 
         // build the color component
@@ -196,8 +194,7 @@ public class Notepad extends JFrame {
             // set the background of the color button to the color selected
             // change PagePanel's brush color to the selected color
             colorButton.setBackground(selectColor);
-            PagePanel.color = selectColor;
-            PagePanel.brushColor = selectColor;
+            anim.setBrushColor(selectColor);
         });
 
         colorGrouper.add(colorButton);
@@ -243,7 +240,7 @@ public class Notepad extends JFrame {
         anim.setJComboBox(frameIndices);
         frameIndices.addActionListener(e ->
         {
-            if(frameIndices.getSelectedIndex() >= 0) {
+            if (frameIndices.getSelectedIndex() >= 0) {
                 anim.setCurrentFrame(frameIndices.getSelectedIndex());
             }
         });
@@ -255,7 +252,17 @@ public class Notepad extends JFrame {
         JCompGrouper animGrouper = new JCompGrouper("Animation");
 
         JButton animateButton = new JButton("Play");
-        animateButton.addActionListener(e -> anim.play());
+        animateButton.addActionListener(e ->
+        {
+            anim.play();
+
+            // potential implementation for play/pause
+//            if(animateButton.getText().equals("Play")) {
+//                animateButton.setText("Pause");
+//            } else {
+//                animateButton.setText("Play");
+//            }
+        });
 
         JCheckBox loopButton = new JCheckBox("Loop");
         animateButton.addActionListener(e -> anim.setLooping(loopButton.isSelected()));
@@ -283,12 +290,12 @@ public class Notepad extends JFrame {
         // animateRibbon.add(panelsGrouper);
     }
 
-    private JButton addPanel(int index){
+    private JButton addPanel(int index) {
         JButton panel = new JButton();
 
         panel.setPreferredSize(BUTTON_DIMENSION);
 
-        if(anim.framesLength() > 0) {
+        if (anim.framesLength() > 0) {
             panel.setIcon(new ImageIcon(anim.getImage(index)));
         }
 
@@ -303,73 +310,10 @@ public class Notepad extends JFrame {
 
     private void remove() {
         anim.removePanel();
-        panelsGrouper.remove(anim.getCurrentIndex());
+        // panelsGrouper.remove(anim.getCurrentIndex());
     }
-
-    private JPanel parentRibbon;
 
     public static void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private static class JCompGrouper extends JPanel {
-
-        private JPanel innerContainer = new JPanel();
-
-        private JCompGrouper() {
-            // set the current layout as a border layout
-            setLayout(new BorderLayout());
-
-            // set the inner container as a JPanel with a flow layout
-            innerContainer.setLayout(new FlowLayout());
-            super.add(innerContainer);
-
-            this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, Color.GRAY));
-        }
-
-        private JCompGrouper(String label) {
-
-            // call default constructor
-            this();
-
-            // create a label for this group
-            JLabel groupLabel = new JLabel(label);
-
-            // add the group layout that is center-aligned to the bottom
-            groupLabel.setHorizontalAlignment(JLabel.CENTER);
-            add(groupLabel, BorderLayout.SOUTH);
-        }
-
-        public void setBackground(Color color) {
-
-            // set the color of the inner background and this background to the color
-            super.setBackground(color);
-
-            if(innerContainer != null) {
-                innerContainer.setBackground(color);
-            }
-        }
-
-        public Component add(Component component) {
-
-            // add the component to the inner container
-            return innerContainer.add(component);
-        }
-
-        public void remove(int currentIndex) {
-            innerContainer.remove(currentIndex);
-        }
-
-        public int getIndexAt(Component other) {
-            int index = -1;
-
-            for(Component comp: innerContainer.getComponents()) {
-                index++;
-                if(comp.equals(other))
-                    return index;
-            }
-
-            return index;
-        }
     }
 }

@@ -11,51 +11,73 @@ import java.util.List;
  * @author : Jay Acosta
  */
 public class AnimationPanel extends JPanel {
-    private static final int DEFAULT_DELAY = 1000;
 
-    private List<Image> frames;
+    // class constants
+    private final int DEFAULT_DELAY = 1000; // in milliseconds
+
+    // instance variables
+
+    // drawing panel
     private PagePanel currentPanel;
+
+    // frame list and index
+    private List<Image> frames;
     private int currentIndex;
+
+    private JComboBox<Integer> frameIndices; // boxes
+
+    // conditionals
+    private boolean removing;
+
+    // timing/animation
+    private boolean isLooping;
+    private Timer timer;
     private int delay;
 
-    private Dimension preferredSize;
-
-    private JComboBox<Integer> frameIndices;
-
-    private boolean removing;
-    private boolean isLooping;
-    private Timer timer; //if false, it is play, if true it is pause
-    private boolean showPrevPanel;
-
+    // initialize the current animation panel instance variables
     public AnimationPanel() {
+        frames = new ArrayList<>(); // create a new list to contain the frames
+
+        // set the properties for the timer
         delay = DEFAULT_DELAY;
-        frames = new ArrayList<>();
         timer = new Timer(delay, new AnimationTask());
-        // currentIndex = -1;
     }
 
     public AnimationPanel(int width, int height) {
-        this();
-        //setBackground(Color.BLACK);
-        preferredSize = new Dimension(width, height);
+        this(); // default constructor call
+
+        // set preferred size to width and height
+        Dimension preferredSize = new Dimension(width, height);
         setPreferredSize(preferredSize);
 
-        addBlankPanel();
+        // add a blank drawing panel
+        addBlankPanel(preferredSize);
     }
 
-    public void addBlankPanel() {
+    public void addBlankPanel(Dimension preferredSize) {
+
+        // create a new panel and add the current panel to the JPanel
         PagePanel addThis = new PagePanel();
         addThis.setPreferredSize(preferredSize);
         add(addThis);
-
-        currentPanel = addThis;
+        currentPanel = addThis; // currentPanel points to PagePanel instance
     }
 
+    // initializes properties that cannot be instantiated during constructor call
     public void initDrawPanel() {
+
+        // call init for PagePanel "currentPanel"
         currentPanel.init();
+
+        // add frame image to the list and drop down index menu
         frames.add(currentPanel.getCurrentImage());
         frameIndices.addItem(frames.size());
     }
+
+    /*
+     * Navigating through frames
+     * Includes adding/deleting frames and setting the current frame
+     */
 
     public void addPanel() {
 
@@ -64,57 +86,104 @@ public class AnimationPanel extends JPanel {
 
         // set the current frame to the current image at the current index
         frames.set(currentIndex, currentPanel.getCurrentImage());
-        // currentPanel.setPrevImage(currentPanel.getCurrentImage());
 
         // add frame clear the current panel and add another frame by incrementing the index
         currentPanel.clearImage();
         frames.add(++currentIndex, currentPanel.getCurrentImage());
 
-        updateBoxNum();
+        updateBoxNum(); // update index drop down
     }
 
     public void removePanel() {
 
+        // if there is more than one frame
         if (frames.size() > 1) {
 
-            removing = true;
+            // set removing and remove frame at current index
             frames.remove(currentIndex);
-            frameIndices.removeAllItems(); //problem
+
+            // remove all items from drop down index menu and update the indices
+            removing = true;
+            frameIndices.removeAllItems();
             resetIndices();
-            if (frames.size() <= currentIndex) {
-                currentIndex--;
-            }
-            System.out.println("Remove Panel Index: " + currentIndex);
             removing = false;
+
+            // if the currentIndex is bigger than the size of the frames list, decrement the index
+            // occurs when removing an item at the end of the list
+            if (currentIndex >= frames.size()) {
+                currentIndex = frames.size() - 1;
+            }
+
+            // set the current frame to the current index
             setCurrentFrame(currentIndex);
         }
     }
 
     private void resetIndices() {
+
+        // add every item from [0, frames.size)
         for (int i = 0; i < frames.size(); i++) {
             frameIndices.addItem(i + 1);
         }
     }
 
     public void forwardOneFrame() {
-        if (currentIndex < frames.size() - 1) {
-            // currentPanel.setImage(frames.get(++currentIndex));
+
+        if (currentIndex + 1 < frames.size()) {
+
+            // only increment if next frame does not go above frames.size()
             setCurrentFrame(++currentIndex);
         }
-        // System.out.println("Index: " + currentIndex);
+
         updateBoxNum();
     }
 
 
     public void backwardOneFrame() {
         if (currentIndex > 0) {
-            // currentPanel.setImage(frames.get(--currentIndex));
+
+            // only decrement if prev frame does not go below zero
             setCurrentFrame(--currentIndex);
         }
-        updateBoxNum();
 
-        // System.out.println("Index: " + currentIndex);
+        updateBoxNum();
     }
+
+    public void setCurrentFrame(int newIndex) {
+        if (!removing) {
+            currentIndex = newIndex;
+            currentPanel.setImage(frames.get(currentIndex));
+
+            if (currentIndex - 1 >= 0) {
+                currentPanel.setPrevImage(frames.get(currentIndex - 1));
+            }
+
+            updateBoxNum();
+        }
+    }
+
+
+    /*
+     * Getters and Setters
+     */
+
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    public int framesLength() {
+        return frames.size();
+    }
+
+    public Image getImage(int index) {
+        if (frames.size() > 0)
+            return frames.get(index);
+        return null;
+    }
+
+    /*
+     * Frame Index Menu Box
+     */
 
     public void updateBoxNum() {
         frameIndices.setSelectedItem(currentIndex + 1);
@@ -124,72 +193,28 @@ public class AnimationPanel extends JPanel {
         frameIndices = other;
     }
 
-    public int getCurrentIndex() {
-        return currentIndex;
+    /*
+     * Calls to PagePanel
+     */
+
+    public void setBrushSize(int brushSize) {
+        currentPanel.setBrushSize(brushSize);
     }
 
-    public void setCurrentFrame(int newIndex) {
-        if (!removing) {
-            currentIndex = newIndex;
-            currentPanel.setImage(frames.get(currentIndex));
-
-            if(currentIndex - 1 >= 0) {
-                currentPanel.setPrevImage(frames.get(currentIndex - 1));
-            }
-
-            updateBoxNum();
-        }
-    }
-
-    public void play() {
-        timer.start();
-    }
-
-    public void setLooping(boolean isLooping){
-        this.isLooping = isLooping;
-    }
-
-    public void stop(){
-        timer.stop();
+    public void setBrushColor(Color brushColor) {
+        currentPanel.setBrushColor(brushColor);
     }
 
     public void erase() {
-        currentPanel.erase();
+        currentPanel.setEraseMode();
     }
 
     public void brush() {
-        currentPanel.brush();
+        currentPanel.setPaintMode();
     }
 
-    public void setFPS(int FPS) {
-        timer.setDelay(1000 / FPS);
-        timer.setInitialDelay(1000 / FPS);
-    }
-
-    public void seeOpaque(JCheckBox box){
-        if(box.isSelected()){
-            if(frames.size() > 1 && currentIndex != 0){
-                currentPanel.setPrevImage(frames.get(currentIndex - 1));
-            }
-        }else{
-            currentPanel.removePrevImage();
-        }
-
-        showPrevPanel = box.isSelected();
-    }
-
-    public void clearPage(){
-        currentPanel.deletePage();
-    }
-
-    public int framesLength(){
-        return frames.size();
-    }
-
-    public Image getImage(int index){
-        if(frames.size() > 0)
-            return frames.get(index);
-        return null;
+    public void clearPage() {
+        currentPanel.clearPage();
     }
 
     public void showShadow(boolean show) {
@@ -197,13 +222,48 @@ public class AnimationPanel extends JPanel {
         setCurrentFrame(currentIndex);
     }
 
+    /*
+     * Animation
+     */
+
+    public void play() {
+
+        timer.start();
+
+        // potential solution for implementing pause
+//        if(!timer.isRunning()) {
+//            timer.start();
+//        } else {
+//            timer.stop();
+//        }
+    }
+
+    public void setLooping(boolean isLooping) {
+        this.isLooping = isLooping;
+    }
+
+    public void stop() {
+        timer.stop();
+    }
+
+    public void setFPS(int FPS) {
+        timer.setDelay(1000 / FPS);
+        timer.setInitialDelay(1000 / FPS);
+    }
+
     private class AnimationTask implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (currentIndex + 1 < frames.size()) {
+
+                // if not at the end, call forward one frame
                 forwardOneFrame();
-            } else if (isLooping){
+            } else if (isLooping) {
+
+                // else, if looping is enabled, set frame to index 0
                 setCurrentFrame(0);
-            }else{
+            } else {
+
+                // otherwise, stop the timer
                 timer.stop();
             }
         }

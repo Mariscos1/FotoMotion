@@ -14,90 +14,110 @@ import java.awt.image.VolatileImage;
  */
 public class PagePanel extends JPanel implements MouseListener, MouseMotionListener {
 
-    private static final int DEFAULT_STROKE_SIZE = 4;
-    private static final Color DEFAULT_COLOR = Color.BLACK;
-    private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
-    private Graphics2D g2BackBuffer;
-    private boolean showShadow;
+    // class constants
+    private final int DEFAULT_STROKE_SIZE = 4;
+    private final Color DEFAULT_COLOR = Color.BLACK;
+    private final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+    private final float SHADOW_TRANSPARENCY = .25f; // should be from [0, 1] where 0 is opaque
 
-    public Color backgroundColor;
-    public static Color color;
-    public static Color brushColor;
-    public static int strokeSize;
+    // instance variables
 
+    // brush and colors
+    private Color backgroundColor, brushColor, currentColor;
+    private int strokeSize;
+
+    // coordinates of points for use in drawing
     private int oldX, oldY, currentX, currentY;
 
+    // show shadow of previous slide
+    private boolean showShadow;
+
+    // buffers
+    private Graphics2D g2BackBuffer;
     private Image backBuffer;
     private Image prevImage;
 
-    public PagePanel(int strokeSize, Color color, Color backgroundColor) {
-        this();
-        this.strokeSize = strokeSize;
-        this.color = color;
-        this.backgroundColor = backgroundColor;
-    }
+    // not using right now, maybe later
+//    public PagePanel(int strokeSize, Color color, Color backgroundColor) {
+//        this();
+//        this.strokeSize = strokeSize;
+//        this.currentColor = color;
+//        this.backgroundColor = backgroundColor;
+//    }
 
+    // pre: none
+    // post: construct a page panel that will handle drawing
     public PagePanel() {
+
+        // set the current panel as focusable and inherit the mouse methods (MouseListener and MouseMotionListener)
         setFocusable(true);
         addMouseListener(this);
         addMouseMotionListener(this);
 
+        // set the class defaults
         this.strokeSize = DEFAULT_STROKE_SIZE;
-        this.color = DEFAULT_COLOR;
+        this.currentColor = DEFAULT_COLOR;
         this.backgroundColor = DEFAULT_BACKGROUND_COLOR;
-        this.brushColor = color;
+        this.brushColor = currentColor;
     }
 
+    // pre: none
+    // post: set the properties of the drawing panel that could not be done in the constructor
     public void init() {
+
+        // create buffer using a volatile image (lossless image)
         backBuffer = createVolatileImage(getWidth(), getHeight());
+
+        // get the graphics of this backBuffer image
         g2BackBuffer = (Graphics2D) backBuffer.getGraphics();
 
+        // draw a rectangle with the background color to "erase" the image
         g2BackBuffer.setColor(DEFAULT_BACKGROUND_COLOR);
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
     }
 
+    /*
+     * Painting Methods
+     */
+
     //CAUTION
     public void paintComponent(Graphics g) {
         super.paintComponent(g); //erases the panel
-        Graphics2D g2 = (Graphics2D) g;
+
+        Graphics2D g2 = (Graphics2D) g; // cast graphics to Graphics2D
 
         if (backBuffer != null) {
+
+            // draw buffer if buffer != null
             g2.drawImage(backBuffer, 0, 0, null);
         }
 
         if (showShadow && prevImage != null) {
-            drawTranslucentImage(g2, ((VolatileImage)prevImage).getSnapshot());
+            drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
         }
     }
 
-    public void showShadow(boolean showShadow) {
-        this.showShadow = showShadow;
-    }
-
+    // draws a translucent version of "image" onto the graphics object
     private void drawTranslucentImage(Graphics2D graphics, BufferedImage image) {
 
         // loop through all pixels in the buffered image
-        for(int x = 0; x < image.getWidth(); x++) {
-            for(int y = 0; y < image.getHeight(); y++) {
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
 
-                // if the current part of the image is not the background color
-                if(image.getRGB(x, y) != backgroundColor.getRGB()) {
+                // if the current part of the image is not the background color...
+                if (image.getRGB(x, y) != backgroundColor.getRGB()) {
 
-                    // set the graphics color to the RGB value
+                    // ... set the graphics color to the RGB value
                     graphics.setColor(new Color(image.getRGB(x, y)));
 
-                    // set the alpha to .1 or 10%
-                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .1f));
+                    // set the alpha
+                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, SHADOW_TRANSPARENCY));
 
                     // draw the pixel as a 1 x 1 filled rectangle
                     graphics.fillRect(x, y, 1, 1);
                 }
             }
         }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
     }
 
     @Override
@@ -108,22 +128,9 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
         //places a dot wherever clicked
         g2BackBuffer.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2BackBuffer.setColor(color);
+        g2BackBuffer.setColor(currentColor);
         g2BackBuffer.fillOval(oldX - strokeSize / 2, oldY - strokeSize / 2, strokeSize, strokeSize);
         repaint();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
     }
 
     @Override
@@ -132,7 +139,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         // g2.setStroke(new BasicStroke(strokeSize));
         g2BackBuffer.setStroke(new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-        g2BackBuffer.setColor(color);
+        g2BackBuffer.setColor(currentColor);
         g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         //draws lines with coordinates
@@ -144,21 +151,9 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    public Image getCurrentImage() {
-        return backBuffer;
-    }
-
-    public void setPrevImage(Image newImage) {
-        prevImage = newImage;
-        repaint();
-    }
-
-    public void removePrevImage(){
-        prevImage = null;
+    public void clearPage() {
+        g2BackBuffer.setColor(backgroundColor);
+        g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
         repaint();
     }
 
@@ -167,25 +162,67 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
+    public void removePrevImage() {
+        prevImage = null;
+        repaint();
+    }
+
+    /*
+     * Properties
+     */
+
+    public void setEraseMode() {
+        currentColor = backgroundColor;
+    }
+
+    public void setPaintMode() {
+        currentColor = brushColor;
+    }
+
+    /*
+     * Getters and setters
+     */
+
+    // pre: none (newColor != null?)
+    // post: sets the current brush color to the new color
+    public void setBrushColor(Color newColor) {
+        currentColor = newColor;
+        brushColor = newColor;
+    }
+
+    // pre: newSize > 0
+    // post: sets the size of the current brush
+    public void setBrushSize(int newSize) {
+
+        // check preconditions
+        if (newSize <= 0)
+            throw new IllegalArgumentException("invalid size selected: " + newSize);
+
+        strokeSize = newSize;
+    }
+
+    public Image getCurrentImage() {
+        return backBuffer;
+    }
+
     public void setImage(Image image) {
         backBuffer = image;
         g2BackBuffer = (Graphics2D) backBuffer.getGraphics();
         repaint();
     }
 
-    public void erase() {
-        color = backgroundColor;
-    }
-
-    public void brush() {
-        color = brushColor;
-    }
-
-    public void deletePage() {
-        g2BackBuffer.setColor(backgroundColor);
-        g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
+    public void setPrevImage(Image newImage) {
+        prevImage = newImage;
         repaint();
     }
+
+    public void showShadow(boolean showShadow) {
+        this.showShadow = showShadow;
+    }
+
+    /*
+     * Methods to implement
+     */
 
     public void undo() {
 
@@ -195,11 +232,27 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     }
 
-    public void changeBrushSize() {
+    /*
+     * Unimplemented methods
+     */
 
+    @Override
+    public void mouseClicked(MouseEvent e) {
     }
 
-    public void changeBrushColor() {
+    @Override
+    public void mouseMoved(MouseEvent e) {
+    }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }
