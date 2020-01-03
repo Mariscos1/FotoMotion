@@ -108,17 +108,24 @@ public class Notepad extends JFrame {
         JMenuItem next = new JMenuItem("Next Frame");
         JMenuItem newFrame = new JMenuItem("New Frame");
         JMenuItem removeFrame = new JMenuItem("Remove Frame");
+        JMenuItem undo = new JMenuItem("Undo");
+        JMenuItem redo = new JMenuItem("Redo");
 
         prev.setAccelerator(KeyStroke.getKeyStroke("LEFT"));
         next.setAccelerator(KeyStroke.getKeyStroke("RIGHT"));
         newFrame.setAccelerator(KeyStroke.getKeyStroke('+'));
         removeFrame.setAccelerator(KeyStroke.getKeyStroke('-'));
+        undo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
+        redo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
 
         prev.addActionListener(e -> backwardOneFrame());
         next.addActionListener(e -> forwardOneFrame());
 
         newFrame.addActionListener(e -> add());
         removeFrame.addActionListener(e -> remove());
+
+        undo.addActionListener(e -> anim.undo());
+        redo.addActionListener(e -> anim.redo());
 
         editMenu.add(paint);
         editMenu.add(animate);
@@ -128,6 +135,9 @@ public class Notepad extends JFrame {
         editMenu.addSeparator();
         editMenu.add(newFrame);
         editMenu.add(removeFrame);
+        editMenu.addSeparator();
+        editMenu.add(undo);
+        editMenu.add(redo);
     }
 
     private void buildRibbonOptions(JPanel ribbon) {
@@ -165,10 +175,18 @@ public class Notepad extends JFrame {
         JButton clearAll = new JButton("Clear All");
         clearAll.addActionListener(e -> anim.clearAll());
 
+        JButton undo = new JButton("Undo");
+        undo.addActionListener(e -> anim.undo());
+
+        JButton redo = new JButton("Redo");
+        redo.addActionListener(e -> anim.redo());
+
         toolGrouper.add(brush);
         toolGrouper.add(erase);
         toolGrouper.add(clearPage);
         toolGrouper.add(clearAll);
+        toolGrouper.add(undo);
+        toolGrouper.add(redo);
 
         // create a grouper for the size object chooser
         // add all numbers from [4, 64] by increments of 4 as size options

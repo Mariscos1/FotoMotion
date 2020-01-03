@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
+import java.awt.image.WritableRaster;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * Handles User-Interface Interaction by using the Graphics
@@ -37,6 +40,10 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private Image backBuffer;
     private Image prevImage;
 
+    // undo/redo
+    private Deque<Image> undoStack;
+    private Deque<Image> redoStack;
+
     // not using right now, maybe later
 //    public PagePanel(int strokeSize, Color color, Color backgroundColor) {
 //        this();
@@ -59,6 +66,10 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         this.currentColor = DEFAULT_COLOR;
         this.backgroundColor = DEFAULT_BACKGROUND_COLOR;
         this.brushColor = currentColor;
+
+        undoStack = new LinkedList<>();
+        redoStack = new LinkedList<>();
+
     }
 
     // pre: none
@@ -122,7 +133,16 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     // draws a translucent version of "image" onto the graphics object
-    private BufferedImage makeTranslucentImage(BufferedImage image) {
+    private BufferedImage makeTranslucentImage(Image newImage, float transparency) {
+
+        BufferedImage image;
+        if(newImage instanceof VolatileImage) {
+            image = ((VolatileImage) newImage).getSnapshot();
+        } else if (newImage instanceof BufferedImage) {
+            image = (BufferedImage) newImage;
+        } else {
+            throw new IllegalArgumentException("Fuck");
+        }
 
         BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
@@ -134,7 +154,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
                 if (image.getRGB(x, y) != backgroundColor.getRGB()) {
 
                     Color oldColor = new Color(image.getRGB(x, y));
-                    Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(),(int)(SHADOW_TRANSPARENCY*255));
+                    Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(),(int)(transparency*255));
 
                     result.setRGB(x, y, newColor.getRGB());
 
@@ -216,6 +236,31 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
      * Getters and setters
      */
 
+    public void setUndoStack(Deque<Image> undoStack) {
+        this.undoStack = undoStack;
+    }
+
+    public Deque<Image> getUndoStack() {
+        return undoStack;
+    }
+
+    public void setRedoStack(Deque<Image> redoStack){
+        this.redoStack = redoStack;
+    }
+
+    public Deque<Image> deepCopy(Deque<Image> other) {
+        Deque<Image> copy = new LinkedList<>();
+
+        for(Image a: other) {
+            copy.addLast(deepCopy(a));
+        }
+        return copy;
+    }
+
+    public Deque<Image> getRedoStack(){
+        return deepCopy(redoStack);
+    }
+
     // pre: none (newColor != null?)
     // post: sets the current brush color to the new color
     public void setBrushColor(Color newColor) {
@@ -246,16 +291,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     public void setPrevImage(Image newImage) {
 
-        BufferedImage temp;
-        if(newImage instanceof VolatileImage) {
-            temp = ((VolatileImage) newImage).getSnapshot();
-        } else if (newImage instanceof BufferedImage) {
-            temp = (BufferedImage) newImage;
-        } else {
-            throw new IllegalArgumentException("Fuck");
-        }
-
-        prevImage = makeTranslucentImage(temp);
+        prevImage = makeTranslucentImage(newImage, SHADOW_TRANSPARENCY);
         repaint();
     }
 
@@ -267,13 +303,59 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
      * Methods to implement
      */
 
-    public void undo() {
+    public Image undo() {
+
+        if(!undoStack.isEmpty()) {
+            Image image = undoStack.pop();
+            redoStack.push(image);
+            return deepCopy(undoStack.peek());
+        } else {
+            return null;
+        }
+    }
+
+    public int getUndosLeft() {
+        return undoStack.size();
+    }
+
+    public Image redo() {
+
+        if (!redoStack.isEmpty()) {
+            undoStack.push(redoStack.pop());
+            return undoStack.peek();
+        }
+        return null;
+    }
+
+    public void clearStacks() {
+        undoStack.clear();
+        redoStack.clear();
+    }
+
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+        Image copy = deepCopy(backBuffer);
+        undoStack.push(copy);
+
+        if(!redoStack.isEmpty())
+            redoStack.clear();
 
     }
 
-    public void redo() {
 
+
+    private Image deepCopy(Image image) {
+
+        Image result = createVolatileImage(getWidth(), getHeight());
+        Graphics grafic = result.getGraphics();
+        grafic.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+
+        return result;
     }
+
+
 
     /*
      * Unimplemented methods
@@ -285,10 +367,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
     }
 
     @Override
