@@ -212,6 +212,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
+
     /*
      * Properties
      */
@@ -283,7 +284,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void setPrevImage(Image newImage) {
-
         prevImage = makeTranslucentImage(newImage, SHADOW_TRANSPARENCY);
         repaint();
     }
@@ -330,6 +330,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
 
+    //pops everything but the last stack
     public void clearStacks() {
 
         while(undoStack.size() > 1) {

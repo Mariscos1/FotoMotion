@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.security.Key;
 
 /**
  * Operates GUI for FotoMotion application
@@ -117,6 +118,8 @@ public class Notepad extends JFrame {
         JMenuItem removeFrame = new JMenuItem("Remove Frame");
         JMenuItem undo = new JMenuItem("Undo");
         JMenuItem redo = new JMenuItem("Redo");
+        JMenuItem copy = new JMenuItem("Copy");
+        JMenuItem paste = new JMenuItem("Paste");
 
         prev.setAccelerator(KeyStroke.getKeyStroke("LEFT"));
         next.setAccelerator(KeyStroke.getKeyStroke("RIGHT"));
@@ -124,6 +127,8 @@ public class Notepad extends JFrame {
         removeFrame.setAccelerator(KeyStroke.getKeyStroke('-'));
         undo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
         redo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
+        copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+        paste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 
         prev.addActionListener(e -> backwardOneFrame());
         next.addActionListener(e -> forwardOneFrame());
@@ -133,6 +138,9 @@ public class Notepad extends JFrame {
 
         undo.addActionListener(e -> anim.undo());
         redo.addActionListener(e -> anim.redo());
+
+        copy.addActionListener(e -> copy());
+        paste.addActionListener(e -> paste());
 
         editMenu.add(paint);
         editMenu.add(animate);
@@ -145,6 +153,8 @@ public class Notepad extends JFrame {
         editMenu.addSeparator();
         editMenu.add(undo);
         editMenu.add(redo);
+        editMenu.add(copy);
+        editMenu.add(paste);
     }
 
     private void buildRibbonOptions(JPanel ribbon) {
@@ -339,7 +349,7 @@ public class Notepad extends JFrame {
 
         panelsGrouper = new JCompGrouper();
         JScrollPane windowPain = new JScrollPane(panelsGrouper, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        windowPain.setPreferredSize(new Dimension(200, RIBBON_HEIGHT));
+        windowPain.setPreferredSize(new Dimension(370, RIBBON_HEIGHT));
         windowPain.setFocusable(false);
 
         animateRibbon.add(frameAdders);
