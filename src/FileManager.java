@@ -19,13 +19,16 @@ import java.rmi.server.ExportException;
  */
 public class FileManager {
 
+    //Actual pop-up that allows for directory search
     private static JFileChooser directory = new JFileChooser();
-    private static String THE_THING = "/";
 
     //Sets up the information for the File Chooser, such as the directories ur allowed to use, like how Karen used me
     static {
+        //Gives the default directory given the OS, makes it less complicated really
         directory.setCurrentDirectory(null);
+
         directory.setDialogTitle("I'm sorry karen, i'm good at cornhole, give me the kidz");
+        //Allows us to only access the directory and not the actual folder so there can't be any accidental overwrites
         directory.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     }
 
@@ -33,8 +36,8 @@ public class FileManager {
         return null;
     }
 
+    //Currently only saves the current frame to any file on the users computer
     public static void save(Image currentPanel, Component save) {
-
         try {
 
             //Will function as the full pathway that the snippet will be saved to
@@ -86,6 +89,7 @@ public class FileManager {
 
     }
 
+    //Helper method for the save method that allows the user to know that their work has been saved
     private static void saveComplete(String message){
         JOptionPane.showMessageDialog(null, message, "The TRUTH", JOptionPane.QUESTION_MESSAGE);
     }
