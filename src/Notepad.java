@@ -82,7 +82,7 @@ public class Notepad extends JFrame {
         // add mnemonics (key-bindings for menu options)
 
         // show pop up dialog pop boxes saying that functionality is not ready yet
-        save.addActionListener(e -> Notepad.showErrorMessage("Save has not been implemented"));
+        save.addActionListener(e -> anim.save(save));
         open.addActionListener(e -> Notepad.showErrorMessage("Open has not been implemented"));
 
         // exit is selected
