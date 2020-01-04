@@ -6,7 +6,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -30,7 +29,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private int strokeSize;
 
     // coordinates of points for use in drawing
-    private int oldX, oldY, currentX, currentY;
+    private int oldX, oldY, currentX, currentY, mouseX, mouseY;
 
     // show shadow of previous slide
     private boolean showShadow;
@@ -43,6 +42,9 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     // undo/redo
     private Deque<Image> undoStack;
     private Deque<Image> redoStack;
+
+    //for drawing the circle
+    private boolean mousePressed;
 
     // not using right now, maybe later
 //    public PagePanel(int strokeSize, Color color, Color backgroundColor) {
@@ -87,7 +89,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
 
         //init the stack
-        if(undoStack.isEmpty())
+        if (undoStack.isEmpty())
             undoStack.push(deepCopy(backBuffer));
     }
 
@@ -111,13 +113,15 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
             g2.drawImage(prevImage, 0, 0, getWidth(), getHeight(), null);
             //drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
         }
+        if(!mousePressed)
+            g.drawOval(mouseX - strokeSize / 2, mouseY - strokeSize / 2, strokeSize, strokeSize);
     }
 
     // draws a translucent version of "image" onto the graphics object
     private BufferedImage makeTranslucentImage(Image newImage, float transparency) {
 
         BufferedImage image;
-        if(newImage instanceof VolatileImage) {
+        if (newImage instanceof VolatileImage) {
             image = ((VolatileImage) newImage).getSnapshot();
         } else if (newImage instanceof BufferedImage) {
             image = (BufferedImage) newImage;
@@ -135,7 +139,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
                 if (image.getRGB(x, y) != backgroundColor.getRGB()) {
 
                     Color oldColor = new Color(image.getRGB(x, y));
-                    Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(),(int)(transparency*255));
+                    Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(), (int) (transparency * 255));
 
                     result.setRGB(x, y, newColor.getRGB());
 
@@ -156,6 +160,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mousePressed(MouseEvent e) {
+        mousePressed = true;
+
         //gets begin point for mouseDragged shape
         oldX = e.getX();
         oldY = e.getY();
@@ -187,11 +193,12 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        mousePressed = false;
 
         Image copy = deepCopy(backBuffer);
         undoStack.push(copy);
 
-        if(!redoStack.isEmpty())
+        if (!redoStack.isEmpty())
             redoStack.clear();
     }
 
@@ -237,7 +244,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         return deepCopy(undoStack);
     }
 
-    public void setRedoStack(Deque<Image> redoStack){
+    public void setRedoStack(Deque<Image> redoStack) {
         this.redoStack = redoStack;
     }
 
@@ -251,7 +258,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         return copy;
     }
 
-    public Deque<Image> getRedoStack(){
+    public Deque<Image> getRedoStack() {
         return deepCopy(redoStack);
     }
 
@@ -278,7 +285,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void setImage(Image image, boolean deepCopy) {
-        backBuffer = deepCopy? deepCopy(image): image;
+        backBuffer = deepCopy ? deepCopy(image) : image;
         g2BackBuffer = (Graphics2D) backBuffer.getGraphics();
         repaint();
     }
@@ -298,7 +305,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     public Image undo() {
 
-        if(undoStack.size() > 1) {
+        if (undoStack.size() > 1) {
             redoStack.push(undoStack.pop());
         }
         return undoStack.peek();
@@ -313,17 +320,17 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         return null;
     }
 
-    private void printStacks(){
+    private void printStacks() {
         System.out.println("================================");
-        System.out.println("Undo: "+ undoStack);
-        System.out.println("Redo: "+ redoStack);
+        System.out.println("Undo: " + undoStack);
+        System.out.println("Redo: " + redoStack);
     }
 
     public int getUndosLeft() {
         return undoStack.size();
     }
 
-    public void setFirstStack(Image img){
+    public void setFirstStack(Image img) {
         if (!undoStack.isEmpty())
             undoStack.pop();
         undoStack.push(img);
@@ -333,15 +340,14 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     //pops everything but the last stack
     public void clearStacks() {
 
-        while(undoStack.size() > 1) {
+        while (undoStack.size() > 1) {
             undoStack.pop();
         }
 
-        while(redoStack.size() > 1) {
+        while (redoStack.size() > 1) {
             redoStack.pop();
         }
     }
-
 
 
     public Image deepCopy(Image image) {
@@ -365,6 +371,12 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        if (!mousePressed)
+        {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            repaint();
+        }
     }
 
     @Override
