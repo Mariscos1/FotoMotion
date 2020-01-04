@@ -24,8 +24,8 @@ public class AnimationPanel extends JPanel {
 
     // frame list and index
     private List<Image> frames;
-    //private List<Deque<Image>> undoStack;
-    // private List<Deque<Image>> redoStack;
+    private List<Deque<Image>> undoStack;
+    private List<Deque<Image>> redoStack;
     private int currentIndex;
 
     private JComboBox<Integer> frameIndices; // boxes
@@ -41,8 +41,8 @@ public class AnimationPanel extends JPanel {
     // initialize the current animation panel instance variables
     public AnimationPanel() {
         frames = new ArrayList<>(); // create a new list to contain the frames
-        //undoStack = new LinkedList<>();
-        // redoStack = new LinkedList<>();
+        undoStack = new LinkedList<>();
+        redoStack = new LinkedList<>();
 
         // set the properties for the timer
         delay = DEFAULT_DELAY;
@@ -77,8 +77,8 @@ public class AnimationPanel extends JPanel {
 
         // add frame image to the list and drop down index menu
         frames.add(currentPanel.getCurrentImage());
-        //undoStack.add(currentPanel.getUndoStack());
-        // redoStack.add(currentPanel.getRedoStack());
+        undoStack.add(currentPanel.getUndoStack());
+        redoStack.add(currentPanel.getRedoStack());
         frameIndices.addItem(frames.size());
     }
 
@@ -94,14 +94,14 @@ public class AnimationPanel extends JPanel {
 
         // set the current frame to the current image at the current index
         frames.set(currentIndex, currentPanel.getCurrentImage());
-        //undoStack.set(currentIndex, currentPanel.getUndoStack());
-        // redoStack.set(currentIndex, currentPanel.getRedoStack());
+        undoStack.set(currentIndex, currentPanel.getUndoStack());
+        redoStack.set(currentIndex, currentPanel.getRedoStack());
 
         // add frame clear the current panel and add another frame by incrementing the index
         currentPanel.clearImage();
         frames.add(++currentIndex, currentPanel.getCurrentImage());
-        //undoStack.add(currentIndex, currentPanel.getUndoStack());
-        // redoStack.add(currentIndex, currentPanel.getRedoStack());
+        undoStack.add(currentIndex, currentPanel.getUndoStack());
+        redoStack.add(currentIndex, currentPanel.getRedoStack());
 
         updateBoxNum(); // update index drop down
     }
@@ -113,8 +113,8 @@ public class AnimationPanel extends JPanel {
 
             // set removing and remove frame at current index
             frames.remove(currentIndex);
-            //undoStack.remove(currentIndex);
-            // redoStack.remove(currentIndex);
+            undoStack.remove(currentIndex);
+            redoStack.remove(currentIndex);
 
             // remove all items from drop down index menu and update the indices
             removing = true;
@@ -173,12 +173,11 @@ public class AnimationPanel extends JPanel {
 
     public void setCurrentFrame(int newIndex) {
         if (!removing) {
-            currentIndex = newIndex;
 
-            currentPanel.clearStacks();
-            currentPanel.setImage(frames.get(currentIndex));
-            //currentPanel.setUndoStack(undoStack.get(currentIndex));
-            // currentPanel.setRedoStack(redoStack.get(currentIndex));
+            currentIndex = newIndex;
+            currentPanel.setImage(frames.get(currentIndex), false);
+            currentPanel.setUndoStack(undoStack.get(currentIndex));
+            currentPanel.setRedoStack(redoStack.get(currentIndex));
 
             if (currentIndex - 1 >= 0) {
                 currentPanel.setPrevImage(frames.get(currentIndex - 1));
@@ -251,26 +250,28 @@ public class AnimationPanel extends JPanel {
         }
     }
 
-    public void undo(){
+    public void undo() {
 
         Image undoImage = currentPanel.undo();
 
-        if(undoImage != null && currentPanel.getUndosLeft() > 0) {
+        if (undoImage != null) {
             frames.set(currentIndex, undoImage);
-            currentPanel.setImage(frames.get(currentIndex));
-        } else{
+            currentPanel.setImage(frames.get(currentIndex), true);
+        } else {
+            //System.out.println("cleared");
             currentPanel.clearImage();
         }
     }
 
-    public void redo(){
-       Image redoImage = currentPanel.redo();
+    public void redo() {
+        Image redoImage = currentPanel.redo();
+        System.out.println(redoImage);
 
-       if(redoImage != null){
-           frames.set(currentIndex, redoImage);
-       }
+        if (redoImage != null) {
+            frames.set(currentIndex, redoImage);
+        }
 
-       currentPanel.setImage(frames.get(currentIndex));
+        currentPanel.setImage(frames.get(currentIndex), true);
     }
 
     public void showShadow(boolean show) {
