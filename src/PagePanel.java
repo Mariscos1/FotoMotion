@@ -193,9 +193,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
         if(!redoStack.isEmpty())
             redoStack.clear();
-
-        System.out.println("printing");
-        printStacks();
     }
 
     public void clearPage() {
@@ -304,8 +301,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         if(undoStack.size() > 1) {
             redoStack.push(undoStack.pop());
         }
-        System.out.println("undo");
-        printStacks();
         return undoStack.peek();
     }
 
@@ -313,8 +308,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
         if (redoStack.size() > 0) {
             undoStack.push(redoStack.pop());
-            System.out.println("redo");
-            printStacks();
             return undoStack.peek();
         }
         return null;
@@ -350,7 +343,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
 
 
-    private Image deepCopy(Image image) {
+    public Image deepCopy(Image image) {
 
         Image result = createVolatileImage(getWidth(), getHeight());
         Graphics graphics = result.getGraphics();

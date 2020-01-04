@@ -4,6 +4,7 @@ import java.awt.*;
 public class JCompGrouper extends JPanel {
 
     private JPanel innerContainer = new JPanel();
+    private int top, left, bottom, right;
 
     public JCompGrouper() {
         // set the current layout as a border layout
@@ -13,7 +14,7 @@ public class JCompGrouper extends JPanel {
         innerContainer.setLayout(new FlowLayout());
         super.add(innerContainer);
 
-        this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, Color.GRAY));
+        this.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.GRAY));
     }
 
     public JCompGrouper(String label) {
@@ -28,6 +29,8 @@ public class JCompGrouper extends JPanel {
         groupLabel.setHorizontalAlignment(JLabel.CENTER);
         add(groupLabel, BorderLayout.SOUTH);
     }
+
+
 
     public void setBackground(Color color) {
 
@@ -46,7 +49,8 @@ public class JCompGrouper extends JPanel {
     }
 
     public void remove(int currentIndex) {
-        innerContainer.remove(currentIndex);
+        if(innerContainer.getComponents().length > 0)
+            innerContainer.remove(currentIndex);
     }
 
     public int getIndexAt(Component other) {
@@ -59,6 +63,10 @@ public class JCompGrouper extends JPanel {
         }
 
         return index;
+    }
+
+    public int getLength(){
+        return innerContainer.getComponents().length;
     }
 
     public void removeAll(){
