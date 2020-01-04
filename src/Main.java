@@ -1,5 +1,5 @@
 /**
- * @author : Jay Acosta
+ * @author : Jay Acosta, Ramon Marquez
  */
 
 public class Main {

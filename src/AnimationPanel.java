@@ -325,4 +325,8 @@ public class AnimationPanel extends JPanel {
             }
         }
     }
+
+    public void save(Component save) {
+        FileManager.save(frames.get(currentIndex), save);
+    }
 }
