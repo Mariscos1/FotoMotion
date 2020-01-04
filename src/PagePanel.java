@@ -113,6 +113,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
             g2.drawImage(prevImage, 0, 0, getWidth(), getHeight(), null);
             //drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
         }
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if(!mousePressed)
             g.drawOval(mouseX - strokeSize / 2, mouseY - strokeSize / 2, strokeSize, strokeSize);
     }
