@@ -5,8 +5,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
-import java.awt.image.WritableRaster;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -85,6 +85,10 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         // draw a rectangle with the background color to "erase" the image
         g2BackBuffer.setColor(DEFAULT_BACKGROUND_COLOR);
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
+
+        //init the stack
+        if(undoStack.isEmpty())
+            undoStack.push(deepCopy(backBuffer));
     }
 
     /*
@@ -106,29 +110,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         if (showShadow && prevImage != null) {
             g2.drawImage(prevImage, 0, 0, getWidth(), getHeight(), null);
             //drawTranslucentImage(g2, ((VolatileImage) prevImage).getSnapshot());
-        }
-    }
-
-    // draws a translucent version of "image" onto the graphics object
-    private void drawTranslucentImage(Graphics2D graphics, BufferedImage image) {
-
-        // loop through all pixels in the buffered image
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-
-                // if the current part of the image is not the background color...
-                if (image.getRGB(x, y) != backgroundColor.getRGB()) {
-
-                    // ... set the graphics color to the RGB value
-                    graphics.setColor(new Color(image.getRGB(x, y)));
-
-                    // set the alpha
-                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, SHADOW_TRANSPARENCY));
-
-                    // draw the pixel as a 1 x 1 filled rectangle
-                    graphics.fillRect(x, y, 1, 1);
-                }
-            }
         }
     }
 
@@ -204,6 +185,19 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+        Image copy = deepCopy(backBuffer);
+        undoStack.push(copy);
+
+        if(!redoStack.isEmpty())
+            redoStack.clear();
+
+        System.out.println("printing");
+        printStacks();
+    }
+
     public void clearPage() {
         g2BackBuffer.setColor(backgroundColor);
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
@@ -211,6 +205,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void clearImage() {
+        clearStacks();
         init();
         repaint();
     }
@@ -241,7 +236,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public Deque<Image> getUndoStack() {
-        return undoStack;
+        return deepCopy(undoStack);
     }
 
     public void setRedoStack(Deque<Image> redoStack){
@@ -251,9 +246,10 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public Deque<Image> deepCopy(Deque<Image> other) {
         Deque<Image> copy = new LinkedList<>();
 
-        for(Image a: other) {
-            copy.addLast(deepCopy(a));
+        for (Image image : other) {
+            copy.addLast(deepCopy(image));
         }
+
         return copy;
     }
 
@@ -283,8 +279,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         return backBuffer;
     }
 
-    public void setImage(Image image) {
-        backBuffer = image;
+    public void setImage(Image image, boolean deepCopy) {
+        backBuffer = deepCopy? deepCopy(image): image;
         g2BackBuffer = (Graphics2D) backBuffer.getGraphics();
         repaint();
     }
@@ -305,43 +301,51 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     public Image undo() {
 
-        if(!undoStack.isEmpty()) {
-            Image image = undoStack.pop();
-            redoStack.push(image);
-            return deepCopy(undoStack.peek());
-        } else {
-            return null;
+        if(undoStack.size() > 1) {
+            redoStack.push(undoStack.pop());
         }
+        System.out.println("undo");
+        printStacks();
+        return undoStack.peek();
+    }
+
+    public Image redo() {
+
+        if (redoStack.size() > 0) {
+            undoStack.push(redoStack.pop());
+            System.out.println("redo");
+            printStacks();
+            return undoStack.peek();
+        }
+        return null;
+    }
+
+    private void printStacks(){
+        System.out.println("================================");
+        System.out.println("Undo: "+ undoStack);
+        System.out.println("Redo: "+ redoStack);
     }
 
     public int getUndosLeft() {
         return undoStack.size();
     }
 
-    public Image redo() {
-
-        if (!redoStack.isEmpty()) {
-            undoStack.push(redoStack.pop());
-            return undoStack.peek();
-        }
-        return null;
+    public void setFirstStack(Image img){
+        if (!undoStack.isEmpty())
+            undoStack.pop();
+        undoStack.push(img);
     }
+
 
     public void clearStacks() {
-        undoStack.clear();
-        redoStack.clear();
-    }
 
+        while(undoStack.size() > 1) {
+            undoStack.pop();
+        }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-        Image copy = deepCopy(backBuffer);
-        undoStack.push(copy);
-
-        if(!redoStack.isEmpty())
-            redoStack.clear();
-
+        while(redoStack.size() > 1) {
+            redoStack.pop();
+        }
     }
 
 
@@ -349,8 +353,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private Image deepCopy(Image image) {
 
         Image result = createVolatileImage(getWidth(), getHeight());
-        Graphics grafic = result.getGraphics();
-        grafic.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+        Graphics graphics = result.getGraphics();
+        graphics.drawImage(image, 0, 0, getWidth(), getHeight(), null);
 
         return result;
     }
