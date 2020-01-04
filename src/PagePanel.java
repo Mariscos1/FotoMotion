@@ -202,6 +202,16 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
             redoStack.clear();
     }
 
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        if (!mousePressed)
+        {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            repaint();
+        }
+    }
+
     public void clearPage() {
         g2BackBuffer.setColor(backgroundColor);
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
@@ -367,16 +377,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        if (!mousePressed)
-        {
-            mouseX = e.getX();
-            mouseY = e.getY();
-            repaint();
-        }
     }
 
     @Override
