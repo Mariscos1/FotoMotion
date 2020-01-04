@@ -34,24 +34,39 @@ public class FileManager {
     }
 
     public static void save(Image currentPanel, Component save) {
-        String pathway = "";
-        if(directory.showOpenDialog(save) == JFileChooser.APPROVE_OPTION){
-            pathway = directory.getSelectedFile().getAbsolutePath() + THE_THING;
-        }
-
-        File f1 = new File(pathway + "gay.jpeg");
 
         try {
-            BufferedImage temp;
-            if(currentPanel instanceof BufferedImage) {
-                temp = (BufferedImage) currentPanel;
-            } else if (currentPanel instanceof VolatileImage) {
-                temp = ((VolatileImage) currentPanel).getSnapshot();
-            } else  {
-                throw new IllegalArgumentException("gay please");
+
+            //Will function as the full pathway that the snippet will be saved to
+            String pathway = ".png";
+
+            //Runs if the actual save button is pressed, then it does all the good stuff below
+            if(directory.showSaveDialog(save) == JFileChooser.APPROVE_OPTION){
+                pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
+                System.out.println(pathway);
+
+                File f1 = new File(pathway);
+
+                //Snippet converts whatever image that was sent into the method into a BufferedImage
+                BufferedImage temp;
+                if(currentPanel instanceof BufferedImage) {
+                    temp = (BufferedImage) currentPanel;
+                } else if (currentPanel instanceof VolatileImage) {
+                    temp = ((VolatileImage) currentPanel).getSnapshot();
+                } else  {
+                    throw new IllegalArgumentException("gay please");
+                }
+
+                //Makes the actual Image that gets saved into the directory of choosing. Turned into png
+                ImageIO.write(temp, "png", f1);
+                saveComplete("Karen Still doesn't love you, and she never did." +
+                        "\n She just used you for your money Adam.\n" +
+                        "Also it saved, but won't show up till you close the file bt dubs.");
+
+            } else {
+                //Shown whenever the person decides not to save their frame
+                Notepad.showErrorMessage("You dumbass. You didn't save DUMBASS.");
             }
-            ImageIO.write(temp, "jpeg", f1);
-            Notepad.showErrorMessage("Karen Still doesn't love you, and she never did. \n She just used you for your money Adam.");
 
         } catch(Exception e){
             e.printStackTrace();
@@ -69,5 +84,9 @@ public class FileManager {
 
     public static void saveAs() {
 
+    }
+
+    private static void saveComplete(String message){
+        JOptionPane.showMessageDialog(null, message, "The TRUTH", JOptionPane.QUESTION_MESSAGE);
     }
 }

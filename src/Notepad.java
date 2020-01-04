@@ -85,6 +85,9 @@ public class Notepad extends JFrame {
         save.addActionListener(e -> anim.save(save));
         open.addActionListener(e -> Notepad.showErrorMessage("Open has not been implemented"));
 
+        save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+
         // exit is selected
         exit.addActionListener(e -> System.exit(1));
 
