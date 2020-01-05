@@ -14,7 +14,7 @@ import java.security.Key;
 public class Notepad extends JFrame {
 
     private final String APP_NAME = "FotoMotion";
-    public static final int HEIGHT = 560;
+    public static final int HEIGHT = 570;
     public static final int WIDTH = 860;
     public static final int DRAWING_HEIGHT = 440;
     public static final int DRAWING_WIDTH = 750;
@@ -257,18 +257,6 @@ public class Notepad extends JFrame {
         navRibbon.setPreferredSize(new Dimension(RIBBON_WIDTH, HEIGHT - RIBBON_HEIGHT));
         navRibbon.setLayout(new GridBagLayout());
 
-
-        JButton copyButton = new JButton("C");
-        copyButton.addActionListener(e -> copy());
-
-        JButton pasteButton = new JButton("P");
-        pasteButton.addActionListener(e-> paste());
-
-        navRibbon.add(copyButton,gbc);
-        navRibbon.add(pasteButton,gbc);
-
-        gbc.gridy = 1;
-
         JButton prev = new JButton("<-");
         prev.addActionListener(e -> backwardOneFrame());
 
@@ -284,10 +272,27 @@ public class Notepad extends JFrame {
             }
         });
 
+        gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         navRibbon.add(frameIndices,gbc);
-        gbc.gridy = 2;
+
+        gbc.gridx = -1;
+        gbc.gridy = 1;
         navRibbon.add(prev, gbc);
         navRibbon.add(next, gbc);
+
+        JButton copyButton = new JButton("C");
+        copyButton.addActionListener(e -> copy());
+
+        JButton pasteButton = new JButton("P");
+        pasteButton.addActionListener(e-> paste());
+
+
+        gbc.gridy = 2;
+        navRibbon.add(copyButton,gbc);
+        navRibbon.add(pasteButton,gbc);
 
     }
 
