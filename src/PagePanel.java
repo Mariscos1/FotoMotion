@@ -169,6 +169,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
         //places a dot wherever clicked
         g2BackBuffer.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2BackBuffer.setColor(currentColor);
         g2BackBuffer.fillOval(oldX - strokeSize / 2, oldY - strokeSize / 2, strokeSize, strokeSize);
         repaint();
