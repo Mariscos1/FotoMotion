@@ -217,6 +217,11 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void clearPage() {
         g2BackBuffer.setColor(backgroundColor);
         g2BackBuffer.fillRect(0, 0, getWidth(), getHeight());
+        g2BackBuffer.drawImage(backBuffer,0,0,null);
+
+        Image copy = deepCopy(backBuffer);
+        undoStack.push(copy);
+
         repaint();
     }
 

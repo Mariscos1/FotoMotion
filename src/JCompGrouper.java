@@ -4,23 +4,31 @@ import java.awt.*;
 public class JCompGrouper extends JPanel {
 
     private JPanel innerContainer = new JPanel();
-    private int top, left, bottom, right;
 
     public JCompGrouper() {
         // set the current layout as a border layout
-        setLayout(new BorderLayout());
-
         // set the inner container as a JPanel with a flow layout
-        innerContainer.setLayout(new FlowLayout());
-        super.add(innerContainer);
-
-        this.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.GRAY));
+        init(null);
     }
 
-    public JCompGrouper(String label) {
+    public JCompGrouper(LayoutManager layout){
+        init(layout);
+    }
+
+    public void init(LayoutManager layout){
+        setLayout(new BorderLayout());
+        if (layout != null) {
+            innerContainer.setLayout(layout);
+        } else {
+            innerContainer.setLayout(new FlowLayout());
+        }
+        super.add(innerContainer);
+    }
+
+    public JCompGrouper(String label, LayoutManager layout) {
 
         // call default constructor
-        this();
+        this(layout);
 
         // create a label for this group
         JLabel groupLabel = new JLabel(label);
@@ -30,7 +38,9 @@ public class JCompGrouper extends JPanel {
         add(groupLabel, BorderLayout.SOUTH);
     }
 
-
+    public void setBorder(int top, int left, int bottom, int right){
+        this.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.GRAY));
+    }
 
     public void setBackground(Color color) {
 
@@ -46,6 +56,10 @@ public class JCompGrouper extends JPanel {
 
         // add the component to the inner container
         return innerContainer.add(component);
+    }
+
+    public void add(Component component, GridBagConstraints gbc){
+        innerContainer.add(component, gbc);
     }
 
     public void remove(int currentIndex) {
