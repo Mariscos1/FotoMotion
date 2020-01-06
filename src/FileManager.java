@@ -98,7 +98,7 @@ public class FileManager {
                 // between frames, which loops continuously
                 GifSequenceWriter writer = new GifSequenceWriter(output, firstOne.getType(), timeBetweenFrame, true);
                 writer.writeToSequence(firstOne);
-                for(int i = 1; i < gifImages.size() - 1; i ++){
+                for(int i = 1; i < gifImages.size(); i ++){
                     writer.writeToSequence(turnBuff(gifImages.get(i)));
                 }
                 writer.close();
