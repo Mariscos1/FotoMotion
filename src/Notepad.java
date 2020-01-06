@@ -172,7 +172,6 @@ public class Notepad extends JFrame {
         parentRibbon.add(animateRibbon, "ANIMATE");
     }
 
-
     private void buildVerticalRibbon(JPanel verRibbon) {
         //add all components before gbc, please try to keep them in order
         verRibbon.setPreferredSize(new Dimension(RIBBON_WIDTH, HEIGHT - RIBBON_HEIGHT));
@@ -200,6 +199,7 @@ public class Notepad extends JFrame {
 
         // add a color button that allows user to choose the color of their brush
         JButton colorButton = new JButton(" ");
+        colorButton.setFocusable(false);
         colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
         colorButton.setBackground(Color.BLACK); // set default color to black
 
