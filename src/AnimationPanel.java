@@ -56,7 +56,7 @@ public class AnimationPanel extends JPanel {
         // set preferred size to width and height
         Dimension preferredSize = new Dimension(width, height);
         setPreferredSize(preferredSize);
-
+        setLayout(new FlowLayout(FlowLayout.LEFT));
         // add a blank drawing panel
         addBlankPanel(preferredSize);
     }

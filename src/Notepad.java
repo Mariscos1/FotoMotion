@@ -311,6 +311,9 @@ public class Notepad extends JFrame {
         centerLabel(label);
         gbc.gridy++;
         gbc.gridx = 0;
+
+
+
         gbc.gridwidth = 2;
         panel.add(label, gbc);
         gbc.gridwidth = 1;
