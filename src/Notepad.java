@@ -1,5 +1,6 @@
 // imports
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -18,14 +19,14 @@ public class Notepad extends JFrame {
     private final String FONT = "Serif";
     public static final int FONT_SIZE = 16;
     public static final int HEIGHT = 570;
-    public static final int WIDTH = 860;
+    public static final int WIDTH = 900;
     public static final int DRAWING_HEIGHT = 440;
     public static final int DRAWING_WIDTH = 750;
     public static final Dimension BUTTON_DIMENSION = new Dimension(48, 32);
     public static final Dimension VER_BUTTON_DIMENSION = new Dimension(48, 26);
 
     private final int RIBBON_HEIGHT = 60;
-    private final int RIBBON_WIDTH = 90;
+    private final int RIBBON_WIDTH = 120;
 
     private JPanel parentRibbon;
 
@@ -78,6 +79,7 @@ public class Notepad extends JFrame {
         // pack the current JFrame to get preferred sizes and then make visible
         pack();
         setVisible(true);
+        setResizable(false);
 
         anim.initDrawPanel();
         panelsGrouper.add(addPanel());
@@ -191,10 +193,10 @@ public class Notepad extends JFrame {
             anim.setBrushSize((Integer) sizes.getSelectedItem());
         });
 
-        JButton erase = new JButton("E");
+        JButton erase = new JButton("Erase");
         erase.addActionListener(e -> anim.erase());
 
-        JButton brush = new JButton("B");
+        JButton brush = new JButton("Brush");
         brush.addActionListener(e -> anim.brush());
 
         // add a color button that allows user to choose the color of their brush
@@ -248,7 +250,7 @@ public class Notepad extends JFrame {
             }
         });
 
-        JButton colorSelector = new JButton("S");
+        JButton colorSelector = new JButton("Color Select");
         colorSelector.addActionListener(e -> colorSelector());
         colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
 
@@ -270,25 +272,25 @@ public class Notepad extends JFrame {
         next.setPreferredSize(VER_BUTTON_DIMENSION);
         next.addActionListener(e -> anim.forwardOneFrame());
 
-        JButton undoButton = new JButton("U");
+        JButton undoButton = new JButton("Undo");
         undoButton.setPreferredSize(VER_BUTTON_DIMENSION);
         undoButton.addActionListener(e -> anim.undo());
 
-        JButton redoButton = new JButton("R");
+        JButton redoButton = new JButton("Redo");
         redoButton.setPreferredSize(VER_BUTTON_DIMENSION);
         redoButton.addActionListener(e -> anim.redo());
 
-        JButton copyButton = new JButton("C");
+        JButton copyButton = new JButton("Copy");
         copyButton.setPreferredSize(VER_BUTTON_DIMENSION);
         copyButton.addActionListener(e -> copy());
 
-        JButton pasteButton = new JButton("P");
+        JButton pasteButton = new JButton("Paste");
         pasteButton.addActionListener(e -> paste());
 
-        JButton clearPage = new JButton("x");
+        JButton clearPage = new JButton("X");
         clearPage.addActionListener(e -> anim.clearPage());
 
-        JButton clearAll = new JButton("X");
+        JButton clearAll = new JButton("X all");
         clearAll.addActionListener(e -> anim.clearAll());
 
 
@@ -336,7 +338,7 @@ public class Notepad extends JFrame {
         addButtonSet(clearPage, clearAll, verRibbon, gbc);
 
         //padding to move all the components to the top
-        addDud(6, verRibbon, gbc);
+        addDud(4, verRibbon, gbc);
     }
 
     private void addDud(int amount, JPanel panel, GridBagConstraints gbc) {
@@ -439,7 +441,7 @@ public class Notepad extends JFrame {
 
         panelsGrouper = new JCompGrouper();
         JScrollPane windowPain = new JScrollPane(panelsGrouper, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        windowPain.setPreferredSize(new Dimension(370, RIBBON_HEIGHT));
+        windowPain.setPreferredSize(new Dimension(440, RIBBON_HEIGHT));
         windowPain.setFocusable(false);
 
         animateRibbon.add(frameGrouper);
