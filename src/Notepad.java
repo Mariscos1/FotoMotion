@@ -212,8 +212,8 @@ public class Notepad extends JFrame {
             if (selectColor != null) {
                 // set the background of the color button to the color selected
                 // change PagePanel's brush color to the selected color
-                colorButton.setBackground(selectColor);
                 anim.setBrushColor(selectColor);
+                colorButton.setBackground(new Color(selectColor.getRGB()));
             }
         });
 
