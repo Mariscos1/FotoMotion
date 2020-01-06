@@ -36,6 +36,7 @@ public class AnimationPanel extends JPanel {
     // timing/animation
     private boolean isLooping;
     private Timer timer;
+    private Image copiedImage;
     private int delay;
 
     // initialize the current animation panel instance variables
@@ -250,6 +251,19 @@ public class AnimationPanel extends JPanel {
         }
     }
 
+    public void copy(){
+        copiedImage = currentPanel.deepCopy(frames.get(currentIndex));
+    }
+
+    public void paste(){
+
+        undoStack.get(currentIndex).push(currentPanel.deepCopy(copiedImage));
+
+        frames.set(currentIndex, copiedImage);
+        currentPanel.setImage(frames.get(currentIndex), false);
+
+    }
+
     public void undo() {
 
         Image undoImage = currentPanel.undo();
@@ -284,15 +298,7 @@ public class AnimationPanel extends JPanel {
      */
 
     public void play() {
-
         timer.start();
-
-        // potential solution for implementing pause
-//        if(!timer.isRunning()) {
-//            timer.start();
-//        } else {
-//            timer.stop();
-//        }
     }
 
     public void setLooping(boolean isLooping) {

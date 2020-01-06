@@ -7,19 +7,29 @@ public class JCompGrouper extends JPanel {
 
     public JCompGrouper() {
         // set the current layout as a border layout
-        setLayout(new BorderLayout());
-
         // set the inner container as a JPanel with a flow layout
-        innerContainer.setLayout(new FlowLayout());
-        super.add(innerContainer);
+        init(null);
 
-        this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, Color.GRAY));
     }
 
-    public JCompGrouper(String label) {
+    public JCompGrouper(LayoutManager layout){
+        init(layout);
+    }
+
+    public void init(LayoutManager layout){
+        setLayout(new BorderLayout());
+        if (layout != null) {
+            innerContainer.setLayout(layout);
+        } else {
+            innerContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
+        }
+        super.add(innerContainer);
+    }
+
+    public JCompGrouper(String label, LayoutManager layout) {
 
         // call default constructor
-        this();
+        this(layout);
 
         // create a label for this group
         JLabel groupLabel = new JLabel(label);
@@ -27,6 +37,10 @@ public class JCompGrouper extends JPanel {
         // add the group layout that is center-aligned to the bottom
         groupLabel.setHorizontalAlignment(JLabel.CENTER);
         add(groupLabel, BorderLayout.SOUTH);
+    }
+
+    public void setBorder(int top, int left, int bottom, int right){
+        this.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.GRAY));
     }
 
     public void setBackground(Color color) {
@@ -45,8 +59,13 @@ public class JCompGrouper extends JPanel {
         return innerContainer.add(component);
     }
 
+    public void add(Component component, GridBagConstraints gbc){
+        innerContainer.add(component, gbc);
+    }
+
     public void remove(int currentIndex) {
-        innerContainer.remove(currentIndex);
+        if(innerContainer.getComponents().length > 0)
+            innerContainer.remove(currentIndex);
     }
 
     public int getIndexAt(Component other) {
@@ -59,6 +78,10 @@ public class JCompGrouper extends JPanel {
         }
 
         return index;
+    }
+
+    public int getLength(){
+        return innerContainer.getComponents().length;
     }
 
     public void removeAll(){

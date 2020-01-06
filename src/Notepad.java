@@ -13,11 +13,17 @@ import java.awt.event.KeyEvent;
 public class Notepad extends JFrame {
 
     private final String APP_NAME = "FotoMotion";
-    public static final int HEIGHT = 500;
-    public static final int WIDTH = 750;
+    private final String FONT = "Serif";
+    public static final int FONT_SIZE = 16;
+    public static final int HEIGHT = 570;
+    public static final int WIDTH = 860;
+    public static final int DRAWING_HEIGHT = 440;
+    public static final int DRAWING_WIDTH = 750;
     public static final Dimension BUTTON_DIMENSION = new Dimension(48, 32);
+    public static final Dimension VER_BUTTON_DIMENSION = new Dimension(48, 26);
 
     private final int RIBBON_HEIGHT = 60;
+    private final int RIBBON_WIDTH = 90;
 
     private JPanel parentRibbon;
 
@@ -35,7 +41,7 @@ public class Notepad extends JFrame {
         setLayout(new BorderLayout());
 
         // create a navigation bar for the frame
-        JMenuBar navigationBar = new JMenuBar();
+        JMenuBar verticalBar = new JMenuBar();
 
         // initialize the current menus for the toolbar
         JMenu fileMenu = new JMenu("File");
@@ -46,23 +52,27 @@ public class Notepad extends JFrame {
         buildEditMenuOptions(editMenu);
 
         // add the menus to the menu bar
-        navigationBar.add(fileMenu);
-        navigationBar.add(editMenu);
+        verticalBar.add(fileMenu);
+        verticalBar.add(editMenu);
 
         // create the main animation panel
-        anim = new AnimationPanel(WIDTH, HEIGHT - RIBBON_HEIGHT);
+        anim = new AnimationPanel(DRAWING_WIDTH, DRAWING_HEIGHT);
 
         // the ribbonPanel will contain all the tools necessary to animate
         JPanel ribbonPanel = new JPanel();
         buildRibbonOptions(ribbonPanel);
 
+        JPanel navRibbon = new JPanel();
+        buildVerticalRibbon(navRibbon);
+
         // get the current content pane and add all components
         Container contentPane = getContentPane();
         contentPane.add(ribbonPanel, BorderLayout.NORTH);
+        contentPane.add(navRibbon, BorderLayout.WEST);
         contentPane.add(anim);
 
         // set the current frame to visible and give the frame a menu bar
-        setJMenuBar(navigationBar);
+        setJMenuBar(verticalBar);
 
         // pack the current JFrame to get preferred sizes and then make visible
         pack();
@@ -113,6 +123,8 @@ public class Notepad extends JFrame {
         JMenuItem removeFrame = new JMenuItem("Remove Frame");
         JMenuItem undo = new JMenuItem("Undo");
         JMenuItem redo = new JMenuItem("Redo");
+        JMenuItem copy = new JMenuItem("Copy");
+        JMenuItem paste = new JMenuItem("Paste");
 
         prev.setAccelerator(KeyStroke.getKeyStroke("LEFT"));
         next.setAccelerator(KeyStroke.getKeyStroke("RIGHT"));
@@ -120,6 +132,8 @@ public class Notepad extends JFrame {
         removeFrame.setAccelerator(KeyStroke.getKeyStroke('-'));
         undo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
         redo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
+        copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+        paste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 
         prev.addActionListener(e -> backwardOneFrame());
         next.addActionListener(e -> forwardOneFrame());
@@ -129,6 +143,9 @@ public class Notepad extends JFrame {
 
         undo.addActionListener(e -> anim.undo());
         redo.addActionListener(e -> anim.redo());
+
+        copy.addActionListener(e -> copy());
+        paste.addActionListener(e -> paste());
 
         editMenu.add(paint);
         editMenu.add(animate);
@@ -141,59 +158,24 @@ public class Notepad extends JFrame {
         editMenu.addSeparator();
         editMenu.add(undo);
         editMenu.add(redo);
+        editMenu.add(copy);
+        editMenu.add(paste);
     }
 
     private void buildRibbonOptions(JPanel ribbon) {
         parentRibbon = ribbon;
         parentRibbon.setLayout(new CardLayout());
 
-        JPanel paintRibbon = new JPanel();
-        buildPaintingRibbon(paintRibbon);
-
         JPanel animateRibbon = new JPanel();
         buildAnimateRibbon(animateRibbon);
 
-        parentRibbon.add(paintRibbon, "PAINT");
         parentRibbon.add(animateRibbon, "ANIMATE");
     }
 
-    private void buildPaintingRibbon(JPanel paintRibbon) {
+    private void buildVerticalRibbon(JPanel verRibbon) {
+        //add all components before gbc, please try to keep them in order
+        verRibbon.setLayout(new GridBagLayout());
 
-        // sets the size of the current paintRibbon and the current layout of the current paintRibbon
-        paintRibbon.setPreferredSize(new Dimension(WIDTH, RIBBON_HEIGHT));
-        paintRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-        // build all tool components
-        JCompGrouper toolGrouper = new JCompGrouper("Tools");
-
-        JButton erase = new JButton("Erase");
-        erase.addActionListener(e -> anim.erase());
-
-        JButton brush = new JButton("Brush");
-        brush.addActionListener(e -> anim.brush());
-
-        JButton clearPage = new JButton("Clear");
-        clearPage.addActionListener(e -> anim.clearPage());
-
-        JButton clearAll = new JButton("Clear All");
-        clearAll.addActionListener(e -> anim.clearAll());
-
-        JButton undo = new JButton("Undo");
-        undo.addActionListener(e -> anim.undo());
-
-        JButton redo = new JButton("Redo");
-        redo.addActionListener(e -> anim.redo());
-
-        toolGrouper.add(brush);
-        toolGrouper.add(erase);
-        toolGrouper.add(clearPage);
-        toolGrouper.add(clearAll);
-        toolGrouper.add(undo);
-        toolGrouper.add(redo);
-
-        // create a grouper for the size object chooser
-        // add all numbers from [4, 64] by increments of 4 as size options
-        JCompGrouper sizeGrouper = new JCompGrouper("Size");
         JComboBox<Integer> sizes = new JComboBox<>();
         for (int i = 4; i <= 64; i += 4) {
             sizes.addItem(i);
@@ -201,14 +183,20 @@ public class Notepad extends JFrame {
         sizes.setSelectedIndex(3);
 
         // this action listener sets the page panel stroke size to the item at a given "size" index
-        sizes.addActionListener(e -> anim.setBrushSize((Integer) sizes.getSelectedItem()));
-        sizeGrouper.add(sizes);
+        sizes.addActionListener(e -> {
+            anim.setBrushSize((Integer) sizes.getSelectedItem());
+        });
 
-        // build the color component
-        JCompGrouper colorGrouper = new JCompGrouper("Color");
+        JButton erase = new JButton("E");
+        erase.addActionListener(e -> anim.erase());
+
+        JButton brush = new JButton("B");
+        brush.addActionListener(e -> anim.brush());
 
         // add a color button that allows user to choose the color of their brush
         JButton colorButton = new JButton(" ");
+        colorButton.setFocusable(false);
+        colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
         colorButton.setBackground(Color.BLACK); // set default color to black
 
         // when color button is pressed, make the JColorChooser pop up
@@ -220,19 +208,117 @@ public class Notepad extends JFrame {
             if (selectColor != null) {
                 // set the background of the color button to the color selected
                 // change PagePanel's brush color to the selected color
-                colorButton.setBackground(selectColor);
                 anim.setBrushColor(selectColor);
+                colorButton.setBackground(new Color(selectColor.getRGB()));
             }
         });
 
-        colorGrouper.add(colorButton);
+        JLabel frameLabel = new JLabel("Frame");
+        JComboBox<Integer> frameIndices = new JComboBox<>();
+        anim.setJComboBox(frameIndices);
+        frameIndices.addActionListener(e ->
+        {
+            if (frameIndices.getSelectedIndex() >= 0) {
+                anim.setCurrentFrame(frameIndices.getSelectedIndex());
+            }
+        });
 
-        // test.setBackground(ribbonPanel.getBackground());
+        JButton prev = new JButton("<-");
+        prev.setPreferredSize(VER_BUTTON_DIMENSION);
+        prev.addActionListener(e -> backwardOneFrame());
 
-        // add the grouper s to the paintRibbon
-        paintRibbon.add(toolGrouper);
-        paintRibbon.add(sizeGrouper);
-        paintRibbon.add(colorGrouper);
+        JButton next = new JButton("->");
+        next.setPreferredSize(VER_BUTTON_DIMENSION);
+        next.addActionListener(e -> anim.forwardOneFrame());
+
+        JButton undoButton = new JButton("U");
+        undoButton.setPreferredSize(VER_BUTTON_DIMENSION);
+        undoButton.addActionListener(e -> anim.undo());
+
+        JButton redoButton = new JButton("R");
+        redoButton.setPreferredSize(VER_BUTTON_DIMENSION);
+        redoButton.addActionListener(e -> anim.redo());
+
+        JButton copyButton = new JButton("C");
+        copyButton.setPreferredSize(VER_BUTTON_DIMENSION);
+        copyButton.addActionListener(e -> copy());
+
+        JButton pasteButton = new JButton("P");
+        pasteButton.addActionListener(e -> paste());
+
+        JButton clearPage = new JButton("x");
+        clearPage.addActionListener(e -> anim.clearPage());
+
+        JButton clearAll = new JButton("X");
+        clearAll.addActionListener(e -> anim.clearAll());
+
+
+        //adding with GridBagConstraints
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        //Paint Block
+        addSeparator(gbc, verRibbon, "Paint");
+        gbc.gridx = 1;
+        gbc.gridy++;
+        verRibbon.add(sizes, gbc);
+        addButtonSet(erase, brush, verRibbon, gbc);
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        verRibbon.add(colorButton, gbc);
+        gbc.gridwidth = 1;
+
+        //navigation block
+        addSeparator(gbc, verRibbon, "Navigation");
+
+        //for frame indices
+        gbc.gridy++;
+        gbc.gridx = 1;
+        verRibbon.add(frameIndices, gbc);
+
+        addButtonSet(prev, next, verRibbon, gbc);
+
+        //edit block
+        addSeparator(gbc, verRibbon, "Edit");
+        addButtonSet(undoButton, redoButton, verRibbon, gbc);
+        addButtonSet(copyButton, pasteButton, verRibbon, gbc);
+        addButtonSet(clearPage, clearAll, verRibbon, gbc);
+
+        //padding to move all the components to the top
+        for (int i = 0; i < 6; i++) {
+            JPanel dud = new JPanel();
+            JPanel dud2 = new JPanel();
+            dud.setPreferredSize(VER_BUTTON_DIMENSION);
+            dud2.setPreferredSize(VER_BUTTON_DIMENSION);
+            addButtonSet(dud, dud2, verRibbon, gbc);
+        }
+    }
+
+    private void addButtonSet(JComponent comp1, JComponent comp2, JPanel panel, GridBagConstraints gbc) {
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(comp1, gbc);
+        gbc.gridx++;
+        panel.add(comp2, gbc);
+    }
+
+    private void addSeparator(GridBagConstraints gbc, JPanel panel, String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font(FONT, Font.ITALIC, FONT_SIZE));
+        label.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.GRAY));
+        centerLabel(label);
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        panel.add(label, gbc);
+        gbc.gridwidth = 1;
+    }
+
+    private void centerLabel(JLabel label) {
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setVerticalAlignment(JLabel.CENTER);
     }
 
     private void buildAnimateRibbon(JPanel animateRibbon) {
@@ -241,7 +327,8 @@ public class Notepad extends JFrame {
         animateRibbon.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // build all tool components
-        JCompGrouper frameAdders = new JCompGrouper("Frame");
+        JCompGrouper frameGrouper = new JCompGrouper("Frame", new FlowLayout());
+        frameGrouper.setBorder(0, 0, 2, 2);
 
         JCheckBox shadowBox = new JCheckBox("Shadow");
         shadowBox.addActionListener(e -> anim.showShadow(shadowBox.isSelected()));
@@ -255,33 +342,14 @@ public class Notepad extends JFrame {
         JButton removeAll = new JButton("=");
         removeAll.addActionListener(e -> removeAllPanels());
 
-        frameAdders.add(shadowBox);
-        frameAdders.add(addFrame);
-        frameAdders.add(removeFrame);
-        frameAdders.add(removeAll);
+        frameGrouper.add(shadowBox);
+        frameGrouper.add(addFrame);
+        frameGrouper.add(removeFrame);
+        frameGrouper.add(removeAll);
 
-        JCompGrouper navigation = new JCompGrouper("Navigation");
-        JButton prev = new JButton("<-");
-        prev.addActionListener(e -> backwardOneFrame());
 
-        JButton next = new JButton("->");
-        next.addActionListener(e -> anim.forwardOneFrame());
-
-        JComboBox<Integer> frameIndices = new JComboBox<>();
-        // frameIndices.addItem(1);
-        anim.setJComboBox(frameIndices);
-        frameIndices.addActionListener(e ->
-        {
-            if (frameIndices.getSelectedIndex() >= 0) {
-                anim.setCurrentFrame(frameIndices.getSelectedIndex());
-            }
-        });
-
-        navigation.add(frameIndices);
-        navigation.add(prev);
-        navigation.add(next);
-
-        JCompGrouper animGrouper = new JCompGrouper("Animation");
+        JCompGrouper animGrouper = new JCompGrouper("Animation", new FlowLayout());
+        animGrouper.setBorder(0, 0, 0, 2);
 
         JButton animateButton = new JButton("Play");
         animateButton.addActionListener(e ->
@@ -316,13 +384,20 @@ public class Notepad extends JFrame {
 
         panelsGrouper = new JCompGrouper();
         JScrollPane windowPain = new JScrollPane(panelsGrouper, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        windowPain.setPreferredSize(new Dimension(200, RIBBON_HEIGHT));
+        windowPain.setPreferredSize(new Dimension(370, RIBBON_HEIGHT));
         windowPain.setFocusable(false);
 
-        animateRibbon.add(frameAdders);
-         animateRibbon.add(navigation);
+        animateRibbon.add(frameGrouper);
         animateRibbon.add(animGrouper);
         animateRibbon.add(windowPain);
+    }
+
+    private void copy() {
+        anim.copy();
+    }
+
+    private void paste() {
+        anim.paste();
     }
 
     private void backwardOneFrame() {
@@ -335,7 +410,7 @@ public class Notepad extends JFrame {
         anim.forwardOneFrame();
     }
 
-    private void removeAllPanels(){
+    private void removeAllPanels() {
         anim.removeAllPanels();
         panelsGrouper.removeAll();
         panelsGrouper.add(addPanel());
@@ -365,11 +440,13 @@ public class Notepad extends JFrame {
     }
 
     private void remove() {
-        panelsGrouper.remove(anim.getCurrentIndex());
-        anim.removePanel();
-
+        if (panelsGrouper.getLength() > 1) {
+            panelsGrouper.remove(anim.getCurrentIndex());
+            anim.removePanel();
+        } else {
+            anim.clearPage();
+        }
     }
-
 
     public static void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
