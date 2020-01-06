@@ -264,11 +264,13 @@ public class Notepad extends JFrame {
             }
         });
 
-        JButton prev = new JButton("<-");
+        JButton prev = new JButton("<--");
+        prev.setFont(new Font("Arial", Font.PLAIN, 12 ));
         prev.setPreferredSize(VER_BUTTON_DIMENSION);
         prev.addActionListener(e -> backwardOneFrame());
 
-        JButton next = new JButton("->");
+        JButton next = new JButton("-->");
+        next.setFont(new Font("Arial", Font.PLAIN, 12 ));
         next.setPreferredSize(VER_BUTTON_DIMENSION);
         next.addActionListener(e -> anim.forwardOneFrame());
 

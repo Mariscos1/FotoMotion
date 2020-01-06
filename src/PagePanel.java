@@ -193,11 +193,28 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void mouseReleased(MouseEvent e) {
         mousePressed = false;
 
-        Image copy = deepCopy(backBuffer);
-        undoStack.push(copy);
+        if(!colorSelecting) {
+            Image copy = deepCopy(backBuffer);
+            undoStack.push(copy);
 
-        if (!redoStack.isEmpty())
-            redoStack.clear();
+            if (!redoStack.isEmpty())
+                redoStack.clear();
+        }else{
+            BufferedImage image;
+            if (backBuffer instanceof VolatileImage) {
+                image = ((VolatileImage) backBuffer).getSnapshot();
+            } else if (backBuffer instanceof BufferedImage) {
+                image = (BufferedImage) backBuffer;
+            } else {
+                throw new IllegalArgumentException("Fuck");
+            }
+
+            currentColor = new Color(image.getRGB(e.getX(), e.getY()));
+            colorSelecting = false;
+
+            oldX = e.getX();
+            oldY = e.getX();
+        }
     }
 
     @Override
@@ -211,20 +228,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(colorSelecting){
-
-            BufferedImage image;
-            if (backBuffer instanceof VolatileImage) {
-                image = ((VolatileImage) backBuffer).getSnapshot();
-            } else if (backBuffer instanceof BufferedImage) {
-                image = (BufferedImage) backBuffer;
-            } else {
-                throw new IllegalArgumentException("Fuck");
-            }
-
-            currentColor = new Color(image.getRGB(e.getX(), e.getY()));
-            colorSelecting = false;
-        }
     }
 
     public void clearPage() {
