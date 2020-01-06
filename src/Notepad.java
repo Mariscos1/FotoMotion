@@ -174,11 +174,7 @@ public class Notepad extends JFrame {
 
     private void buildVerticalRibbon(JPanel verRibbon) {
         //add all components before gbc, please try to keep them in order
-        verRibbon.setPreferredSize(new Dimension(RIBBON_WIDTH, HEIGHT - RIBBON_HEIGHT));
         verRibbon.setLayout(new GridBagLayout());
-
-        JButton dudButton = new JButton();
-        dudButton.setVisible(false);
 
         JComboBox<Integer> sizes = new JComboBox<>();
         for (int i = 4; i <= 64; i += 4) {
@@ -261,7 +257,6 @@ public class Notepad extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.FIRST_LINE_END;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridy = -1;
 
         //Paint Block
         addSeparator(gbc, verRibbon, "Paint");
@@ -290,14 +285,23 @@ public class Notepad extends JFrame {
         addButtonSet(undoButton, redoButton, verRibbon, gbc);
         addButtonSet(copyButton, pasteButton, verRibbon, gbc);
         addButtonSet(clearPage, clearAll, verRibbon, gbc);
+
+        //padding to move all the components to the top
+        for (int i = 0; i < 6; i++) {
+            JPanel dud = new JPanel();
+            JPanel dud2 = new JPanel();
+            dud.setPreferredSize(VER_BUTTON_DIMENSION);
+            dud2.setPreferredSize(VER_BUTTON_DIMENSION);
+            addButtonSet(dud, dud2, verRibbon, gbc);
+        }
     }
 
-    private void addButtonSet(JButton button1, JButton button2, JPanel panel, GridBagConstraints gbc) {
+    private void addButtonSet(JComponent comp1, JComponent comp2, JPanel panel, GridBagConstraints gbc) {
         gbc.gridy++;
         gbc.gridx = 0;
-        panel.add(button1, gbc);
+        panel.add(comp1, gbc);
         gbc.gridx++;
-        panel.add(button2, gbc);
+        panel.add(comp2, gbc);
     }
 
     private void addSeparator(GridBagConstraints gbc, JPanel panel, String text) {
