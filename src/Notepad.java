@@ -307,7 +307,7 @@ public class Notepad extends JFrame {
     private void addSeparator(GridBagConstraints gbc, JPanel panel, String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font(FONT, Font.ITALIC, FONT_SIZE));
-        label.setBorder(BorderFactory.createMatteBorder(3, 0, 0, 0, Color.GRAY));
+        label.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.GRAY));
         centerLabel(label);
         gbc.gridy++;
         gbc.gridx = 0;
@@ -328,7 +328,7 @@ public class Notepad extends JFrame {
 
         // build all tool components
         JCompGrouper frameGrouper = new JCompGrouper("Frame", new FlowLayout());
-        frameGrouper.setBorder(0, 0, 0, 2);
+        frameGrouper.setBorder(0, 0, 2, 2);
 
         JCheckBox shadowBox = new JCheckBox("Shadow");
         shadowBox.addActionListener(e -> anim.showShadow(shadowBox.isSelected()));

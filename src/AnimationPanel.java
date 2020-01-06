@@ -298,15 +298,7 @@ public class AnimationPanel extends JPanel {
      */
 
     public void play() {
-
         timer.start();
-
-        // potential solution for implementing pause
-//        if(!timer.isRunning()) {
-//            timer.start();
-//        } else {
-//            timer.stop();
-//        }
     }
 
     public void setLooping(boolean isLooping) {
