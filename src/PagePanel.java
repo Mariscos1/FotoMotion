@@ -172,20 +172,21 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if(!colorSelecting) {
+            // g2.setStroke(new BasicStroke(strokeSize));
+            g2BackBuffer.setStroke(new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-        // g2.setStroke(new BasicStroke(strokeSize));
-        g2BackBuffer.setStroke(new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2BackBuffer.setColor(currentColor);
+            g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2BackBuffer.setColor(currentColor);
-        g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        //draws lines with coordinates
-        currentX = e.getX();
-        currentY = e.getY();
-        g2BackBuffer.drawLine(oldX, oldY, currentX, currentY);
-        oldX = currentX;
-        oldY = currentY;
-        repaint();
+            //draws lines with coordinates
+            currentX = e.getX();
+            currentY = e.getY();
+            g2BackBuffer.drawLine(oldX, oldY, currentX, currentY);
+            oldX = currentX;
+            oldY = currentY;
+            repaint();
+        }
     }
 
     @Override
