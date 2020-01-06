@@ -339,4 +339,12 @@ public class AnimationPanel extends JPanel {
     public void save(Component save) {
         FileManager.save(frames.get(currentIndex), save);
     }
+
+    public void saveAs(Component save) {
+        try {
+            FileManager.saveAs(save, frames, timer.getDelay());
+        } catch (Exception e) {
+            System.out.println("no hetero");
+        }
+    }
 }
