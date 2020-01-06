@@ -64,15 +64,14 @@ public class Notepad extends JFrame {
         JPanel ribbonPanel = new JPanel();
         buildRibbonOptions(ribbonPanel);
 
-        JPanel navRibbon = new JPanel();
-        buildVerticalRibbon(navRibbon);
+        JPanel verRibbon = new JPanel();
+        buildVerticalRibbon(verRibbon);
 
         // get the current content pane and add all components
         Container contentPane = getContentPane();
         contentPane.add(ribbonPanel, BorderLayout.NORTH);
-        contentPane.add(navRibbon, BorderLayout.WEST);
+        contentPane.add(verRibbon, BorderLayout.WEST);
         contentPane.add(anim);
-
         // set the current frame to visible and give the frame a menu bar
         setJMenuBar(verticalBar);
 
@@ -463,13 +462,19 @@ public class Notepad extends JFrame {
         anim.paste();
     }
 
+    private void repaintAll(){
+        for(Component comp: panelsGrouper.getInnerContainer().getComponents()){
+            comp.repaint();
+        }
+    }
+
     private void backwardOneFrame() {
-        panelsGrouper.getComponentAt(anim.getCurrentIndex()).repaint();
+        repaintAll();
         anim.backwardOneFrame();
     }
 
     private void forwardOneFrame() {
-        panelsGrouper.getComponentAt(anim.getCurrentIndex()).repaint();
+        repaintAll();
         anim.forwardOneFrame();
     }
 
@@ -485,7 +490,7 @@ public class Notepad extends JFrame {
 
         panel.setPreferredSize(BUTTON_DIMENSION);
 
-        panel.addActionListener(e -> anim.setCurrentFrame(panelsGrouper.getIndexAt(panel)));
+        panel.addActionListener(e -> setCurrentFrame(panelsGrouper.getIndexAt(panel)));
 
         revalidate();
         return panel;
@@ -509,6 +514,11 @@ public class Notepad extends JFrame {
         } else {
             anim.clearPage();
         }
+    }
+
+    private void setCurrentFrame(int newIndex){
+        anim.setCurrentFrame(newIndex);
+        repaintAll();
     }
 
     public static void showErrorMessage(String message) {

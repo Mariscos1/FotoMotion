@@ -80,6 +80,10 @@ public class JCompGrouper extends JPanel {
         return index;
     }
 
+    public JPanel getInnerContainer(){
+        return innerContainer;
+    }
+
     public int getLength(){
         return innerContainer.getComponents().length;
     }
