@@ -9,6 +9,7 @@ public class JCompGrouper extends JPanel {
         // set the current layout as a border layout
         // set the inner container as a JPanel with a flow layout
         init(null);
+
     }
 
     public JCompGrouper(LayoutManager layout){
@@ -20,7 +21,7 @@ public class JCompGrouper extends JPanel {
         if (layout != null) {
             innerContainer.setLayout(layout);
         } else {
-            innerContainer.setLayout(new FlowLayout());
+            innerContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
         }
         super.add(innerContainer);
     }
