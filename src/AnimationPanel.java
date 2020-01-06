@@ -224,6 +224,10 @@ public class AnimationPanel extends JPanel {
      * Calls to PagePanel
      */
 
+    public void colorSelector(){
+        currentPanel.colorSelector();
+    }
+
     public void setBrushSize(int brushSize) {
         currentPanel.setBrushSize(brushSize);
     }

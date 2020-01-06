@@ -33,6 +33,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     // show shadow of previous slide
     private boolean showShadow;
+    private boolean colorSelecting;
 
     // buffers
     private Graphics2D g2BackBuffer;
@@ -155,16 +156,18 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void mousePressed(MouseEvent e) {
         mousePressed = true;
 
-        //gets begin point for mouseDragged shape
-        oldX = e.getX();
-        oldY = e.getY();
+        if(!colorSelecting) {
+            //gets begin point for mouseDragged shape
+            oldX = e.getX();
+            oldY = e.getY();
 
-        //places a dot wherever clicked
-        g2BackBuffer.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2BackBuffer.setColor(currentColor);
-        g2BackBuffer.fillOval(oldX - strokeSize / 2, oldY - strokeSize / 2, strokeSize, strokeSize);
-        repaint();
+            //places a dot wherever clicked
+            g2BackBuffer.setStroke(new BasicStroke(5.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2BackBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2BackBuffer.setColor(currentColor);
+            g2BackBuffer.fillOval(oldX - strokeSize / 2, oldY - strokeSize / 2, strokeSize, strokeSize);
+            repaint();
+        }
     }
 
     @Override
@@ -202,6 +205,24 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
             mouseX = e.getX();
             mouseY = e.getY();
             repaint();
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if(colorSelecting){
+
+            BufferedImage image;
+            if (backBuffer instanceof VolatileImage) {
+                image = ((VolatileImage) backBuffer).getSnapshot();
+            } else if (backBuffer instanceof BufferedImage) {
+                image = (BufferedImage) backBuffer;
+            } else {
+                throw new IllegalArgumentException("Fuck");
+            }
+
+            currentColor = new Color(image.getRGB(e.getX(), e.getY()));
+            colorSelecting = false;
         }
     }
 
@@ -311,6 +332,11 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
      * Methods to implement
      */
 
+    public void colorSelector(){
+        colorSelecting = true;
+    }
+
+
     public Image undo() {
 
         if (undoStack.size() > 1) {
@@ -372,10 +398,6 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     /*
      * Unimplemented methods
      */
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
 
     @Override
     public void mouseEntered(MouseEvent e) {

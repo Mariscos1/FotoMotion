@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Operates GUI for FotoMotion application
  *
- * @author : Jay Acosta
+ * @author : Jay Acosta, Janlloyd Carangan
  */
 public class Notepad extends JFrame {
 
@@ -246,6 +246,10 @@ public class Notepad extends JFrame {
             }
         });
 
+        JButton colorSelector = new JButton("S");
+        colorSelector.addActionListener(e -> colorSelector());
+        colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
+
         JLabel frameLabel = new JLabel("Frame");
         JComboBox<Integer> frameIndices = new JComboBox<>();
         anim.setJComboBox(frameIndices);
@@ -290,7 +294,8 @@ public class Notepad extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.FIRST_LINE_END;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 0; gbc.weighty =0;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
 
         //Paint Block
         addSeparator(gbc, verRibbon, "Paint");
@@ -300,14 +305,15 @@ public class Notepad extends JFrame {
         addButtonSet(erase, brush, verRibbon, gbc);
 
         //color Buttons
-        addButtonSet(blackButton, whiteButton, verRibbon,gbc);
+        addButtonSet(blackButton, whiteButton, verRibbon, gbc);
         addButtonSet(redButton, yellowButton, verRibbon, gbc);
         addButtonSet(blueButton, greenButton, verRibbon, gbc);
-        addDud(2, verRibbon, gbc);
 
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
+        verRibbon.add(colorSelector,gbc);
+        gbc.gridy++;
         verRibbon.add(colorButton, gbc);
         gbc.gridwidth = 1;
 
@@ -331,7 +337,7 @@ public class Notepad extends JFrame {
         addDud(6, verRibbon, gbc);
     }
 
-    private void addDud(int amount, JPanel panel, GridBagConstraints gbc){
+    private void addDud(int amount, JPanel panel, GridBagConstraints gbc) {
         for (int i = 0; i < amount; i++) {
             JPanel dud = new JPanel();
             JPanel dud2 = new JPanel();
@@ -439,7 +445,11 @@ public class Notepad extends JFrame {
         animateRibbon.add(windowPain);
     }
 
-    private void setBrushColor(Color color, JButton colorButton){
+    private void colorSelector(){
+        anim.colorSelector();
+    }
+
+    private void setBrushColor(Color color, JButton colorButton) {
         anim.setBrushColor(color);
         colorButton.setBackground(color);
         anim.brush();
