@@ -106,6 +106,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
         if (backBuffer != null) {
 
             // draw buffer if buffer != null
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.drawImage(backBuffer, 0, 0, null);
         }
 
