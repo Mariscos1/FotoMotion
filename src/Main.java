@@ -16,7 +16,7 @@ public class Main {
             WINDOWS_CLASSIC_THEME = "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel";
 
     // edit these values to alter the appearance of the JFrame
-    private static final String CHOSEN_THEME = NIMBUS_THEME;
+    private static final String CHOSEN_THEME = METAL_THEME;
     private static final boolean DEFAULT_DECORATION = false;
 
     // Runs the main program

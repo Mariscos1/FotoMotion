@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Operates GUI for FotoMotion application
@@ -175,7 +177,7 @@ public class Notepad extends JFrame {
     private void buildVerticalRibbon(JPanel verRibbon) {
         //add all components before gbc, please try to keep them in order
         verRibbon.setLayout(new GridBagLayout());
-
+        verRibbon.setPreferredSize(new Dimension(RIBBON_WIDTH, HEIGHT - RIBBON_HEIGHT));
         JComboBox<Integer> sizes = new JComboBox<>();
         for (int i = 4; i <= 64; i += 4) {
             sizes.addItem(i);
@@ -195,6 +197,37 @@ public class Notepad extends JFrame {
 
         // add a color button that allows user to choose the color of their brush
         JButton colorButton = new JButton(" ");
+
+        //Color Buttons
+        ArrayList<JButton> colorButtons = new ArrayList<>();
+        JButton blackButton = new JButton();
+        JButton whiteButton = new JButton();
+        JButton redButton = new JButton();
+        JButton yellowButton = new JButton();
+        JButton greenButton = new JButton();
+        JButton blueButton = new JButton();
+
+        colorButtons.add(blackButton);
+        colorButtons.add(whiteButton);
+        colorButtons.add(redButton);
+        colorButtons.add(yellowButton);
+        colorButtons.add(greenButton);
+        colorButtons.add(blueButton);
+
+        blackButton.setBackground(Color.BLACK);
+        whiteButton.setBackground(Color.WHITE);
+        redButton.setBackground(Color.RED);
+        yellowButton.setBackground(Color.YELLOW);
+        greenButton.setBackground(Color.GREEN);
+        blueButton.setBackground(Color.BLUE);
+
+        for (JButton button : colorButtons) {
+            button.setPreferredSize(VER_BUTTON_DIMENSION);
+            button.setText(" ");
+            button.setFocusable(false);
+            button.addActionListener(e -> setBrushColor(button.getBackground(), colorButton));
+        }
+
         colorButton.setFocusable(false);
         colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
         colorButton.setBackground(Color.BLACK); // set default color to black
@@ -257,6 +290,7 @@ public class Notepad extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.FIRST_LINE_END;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0; gbc.weighty =0;
 
         //Paint Block
         addSeparator(gbc, verRibbon, "Paint");
@@ -264,6 +298,13 @@ public class Notepad extends JFrame {
         gbc.gridy++;
         verRibbon.add(sizes, gbc);
         addButtonSet(erase, brush, verRibbon, gbc);
+
+        //color Buttons
+        addButtonSet(blackButton, whiteButton, verRibbon,gbc);
+        addButtonSet(redButton, yellowButton, verRibbon, gbc);
+        addButtonSet(blueButton, greenButton, verRibbon, gbc);
+        addDud(2, verRibbon, gbc);
+
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
@@ -287,12 +328,16 @@ public class Notepad extends JFrame {
         addButtonSet(clearPage, clearAll, verRibbon, gbc);
 
         //padding to move all the components to the top
-        for (int i = 0; i < 6; i++) {
+        addDud(6, verRibbon, gbc);
+    }
+
+    private void addDud(int amount, JPanel panel, GridBagConstraints gbc){
+        for (int i = 0; i < amount; i++) {
             JPanel dud = new JPanel();
             JPanel dud2 = new JPanel();
             dud.setPreferredSize(VER_BUTTON_DIMENSION);
             dud2.setPreferredSize(VER_BUTTON_DIMENSION);
-            addButtonSet(dud, dud2, verRibbon, gbc);
+            addButtonSet(dud, dud2, panel, gbc);
         }
     }
 
@@ -311,7 +356,6 @@ public class Notepad extends JFrame {
         centerLabel(label);
         gbc.gridy++;
         gbc.gridx = 0;
-
 
 
         gbc.gridwidth = 2;
@@ -393,6 +437,12 @@ public class Notepad extends JFrame {
         animateRibbon.add(frameGrouper);
         animateRibbon.add(animGrouper);
         animateRibbon.add(windowPain);
+    }
+
+    private void setBrushColor(Color color, JButton colorButton){
+        anim.setBrushColor(color);
+        colorButton.setBackground(color);
+        anim.brush();
     }
 
     private void copy() {
