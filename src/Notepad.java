@@ -465,6 +465,9 @@ public class Notepad extends JFrame {
     }
 
     private void forwardOneFrame() {
+        if(anim.lastIndex()){
+            add();
+        }
         repaintAll();
         anim.forwardOneFrame();
     }

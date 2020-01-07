@@ -224,6 +224,10 @@ public class AnimationPanel extends JPanel {
      * Calls to PagePanel
      */
 
+    public boolean lastIndex(){
+        return currentIndex == frames.size() - 1;
+    }
+
     public void colorSelector(){
         currentPanel.colorSelector();
     }
