@@ -204,33 +204,17 @@ public class Notepad extends JFrame {
 
         //Color Buttons
         ArrayList<JButton> colorButtons = new ArrayList<>();
-        JButton blackButton = new JButton();
-        JButton whiteButton = new JButton();
-        JButton redButton = new JButton();
-        JButton yellowButton = new JButton();
-        JButton greenButton = new JButton();
-        JButton blueButton = new JButton();
-
-        colorButtons.add(blackButton);
-        colorButtons.add(whiteButton);
-        colorButtons.add(redButton);
-        colorButtons.add(yellowButton);
-        colorButtons.add(greenButton);
-        colorButtons.add(blueButton);
-
-        blackButton.setBackground(Color.BLACK);
-        whiteButton.setBackground(Color.WHITE);
-        redButton.setBackground(Color.RED);
-        yellowButton.setBackground(Color.YELLOW);
-        greenButton.setBackground(Color.GREEN);
-        blueButton.setBackground(Color.BLUE);
-
-        for (JButton button : colorButtons) {
-            button.setPreferredSize(VER_BUTTON_DIMENSION);
-            button.setText(" ");
-            button.setFocusable(false);
-            button.addActionListener(e -> setBrushColor(button.getBackground(), colorButton));
+        Color[] colors = {Color.BLACK, Color.WHITE, Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE};
+        for(Color c: colors){
+            JButton color = new JButton();
+            color.setBackground(c);
+            color.setPreferredSize(VER_BUTTON_DIMENSION);
+            color.setText(" ");
+            color.setFocusable(false);
+            color.addActionListener(e -> setBrushColor(color.getBackground(), colorButton));
+            colorButtons.add(color);
         }
+
 
         colorButton.setFocusable(false);
         colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
@@ -265,12 +249,12 @@ public class Notepad extends JFrame {
         });
 
         JButton prev = new JButton("<--");
-        prev.setFont(new Font("Arial", Font.PLAIN, 12 ));
+        prev.setFont(new Font("Arial", Font.PLAIN, 12));
         prev.setPreferredSize(VER_BUTTON_DIMENSION);
         prev.addActionListener(e -> backwardOneFrame());
 
         JButton next = new JButton("-->");
-        next.setFont(new Font("Arial", Font.PLAIN, 12 ));
+        next.setFont(new Font("Arial", Font.PLAIN, 12));
         next.setPreferredSize(VER_BUTTON_DIMENSION);
         next.addActionListener(e -> anim.forwardOneFrame());
 
@@ -311,14 +295,14 @@ public class Notepad extends JFrame {
         addButtonSet(erase, brush, verRibbon, gbc);
 
         //color Buttons
-        addButtonSet(blackButton, whiteButton, verRibbon, gbc);
-        addButtonSet(redButton, yellowButton, verRibbon, gbc);
-        addButtonSet(blueButton, greenButton, verRibbon, gbc);
+        for (int i = 0; i < colorButtons.size(); i+=2) {
+            addButtonSet(colorButtons.get(i), colorButtons.get(i+1), verRibbon, gbc);
+        }
 
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
-        verRibbon.add(colorSelector,gbc);
+        verRibbon.add(colorSelector, gbc);
         gbc.gridy++;
         verRibbon.add(colorButton, gbc);
         gbc.gridwidth = 1;
@@ -451,7 +435,7 @@ public class Notepad extends JFrame {
         animateRibbon.add(windowPain);
     }
 
-    private void colorSelector(){
+    private void colorSelector() {
         anim.colorSelector();
     }
 
@@ -469,8 +453,8 @@ public class Notepad extends JFrame {
         anim.paste();
     }
 
-    private void repaintAll(){
-        for(Component comp: panelsGrouper.getInnerContainer().getComponents()){
+    private void repaintAll() {
+        for (Component comp : panelsGrouper.getInnerContainer().getComponents()) {
             comp.repaint();
         }
     }
@@ -523,7 +507,7 @@ public class Notepad extends JFrame {
         }
     }
 
-    private void setCurrentFrame(int newIndex){
+    private void setCurrentFrame(int newIndex) {
         anim.setCurrentFrame(newIndex);
         repaintAll();
     }
