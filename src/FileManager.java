@@ -1,9 +1,13 @@
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.rmi.server.ExportException;
 
 /**
@@ -46,19 +50,11 @@ public class FileManager {
             //Runs if the actual save button is pressed, then it does all the good stuff below
             if(directory.showSaveDialog(save) == JFileChooser.APPROVE_OPTION){
                 pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
-                System.out.println(pathway);
 
                 File f1 = new File(pathway);
 
                 //Snippet converts whatever image that was sent into the method into a BufferedImage
-                BufferedImage temp;
-                if(currentPanel instanceof BufferedImage) {
-                    temp = (BufferedImage) currentPanel;
-                } else if (currentPanel instanceof VolatileImage) {
-                    temp = ((VolatileImage) currentPanel).getSnapshot();
-                } else  {
-                    throw new IllegalArgumentException("gay please");
-                }
+                BufferedImage temp = turnBuff(currentPanel);
 
                 //Makes the actual Image that gets saved into the directory of choosing. Turned into png
                 ImageIO.write(temp, "png", f1);
@@ -77,6 +73,7 @@ public class FileManager {
 
     }
 
+
     public static void open() {
 
     }
@@ -85,12 +82,48 @@ public class FileManager {
 
     }
 
-    public static void saveAs() {
+    public static void saveAs(Component parent, List<Image> gifImages, int timeBetweenFrame) throws IOException {
 
+        String pathway = ".gif";
+        if(directory.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            //Gets the directory that the user wishes to save it at
+            pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
+
+            if (gifImages.size() > 1) {
+                BufferedImage firstOne = turnBuff(gifImages.get(0));
+                // create a new BufferedOutputStream with the last argument
+                ImageOutputStream output = new FileImageOutputStream(new File(pathway));
+
+                // create a gif sequence with the type of the first image, 1 second
+                // between frames, which loops continuously
+                GifSequenceWriter writer = new GifSequenceWriter(output, firstOne.getType(), timeBetweenFrame, true);
+                writer.writeToSequence(firstOne);
+                for(int i = 1; i < gifImages.size(); i ++){
+                    writer.writeToSequence(turnBuff(gifImages.get(i)));
+                }
+                writer.close();
+                output.close();
+            } else{
+                Notepad.showErrorMessage("Dumbass make more than one slide, fucking idiot *sigh*");
+            }
+        }
     }
 
     //Helper method for the save method that allows the user to know that their work has been saved
     private static void saveComplete(String message){
         JOptionPane.showMessageDialog(null, message, "The TRUTH", JOptionPane.QUESTION_MESSAGE);
+    }
+
+    //Helper method that helps convert the images sent as a parameter to a BufferedImage Type, then proceeds to return the Buff Image #GAINZ
+    private static BufferedImage turnBuff(Image currentImage){
+        BufferedImage temp;
+        if(currentImage instanceof BufferedImage) {
+            temp = (BufferedImage) currentImage;
+        } else if (currentImage instanceof VolatileImage) {
+            temp = ((VolatileImage) currentImage).getSnapshot();
+        } else  {
+            throw new IllegalArgumentException("gay please");
+        }
+        return temp;
     }
 }

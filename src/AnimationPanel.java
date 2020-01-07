@@ -56,7 +56,7 @@ public class AnimationPanel extends JPanel {
         // set preferred size to width and height
         Dimension preferredSize = new Dimension(width, height);
         setPreferredSize(preferredSize);
-
+        setLayout(new FlowLayout(FlowLayout.LEFT));
         // add a blank drawing panel
         addBlankPanel(preferredSize);
     }
@@ -224,6 +224,14 @@ public class AnimationPanel extends JPanel {
      * Calls to PagePanel
      */
 
+    public boolean lastIndex(){
+        return currentIndex == frames.size() - 1;
+    }
+
+    public void colorSelector(){
+        currentPanel.colorSelector();
+    }
+
     public void setBrushSize(int brushSize) {
         currentPanel.setBrushSize(brushSize);
     }
@@ -334,5 +342,13 @@ public class AnimationPanel extends JPanel {
 
     public void save(Component save) {
         FileManager.save(frames.get(currentIndex), save);
+    }
+
+    public void saveAs(Component save) {
+        try {
+            FileManager.saveAs(save, frames, timer.getDelay());
+        } catch (Exception e) {
+            System.out.println("no hetero");
+        }
     }
 }
