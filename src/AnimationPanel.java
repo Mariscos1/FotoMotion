@@ -226,6 +226,11 @@ public class AnimationPanel extends JPanel {
 
     public boolean lastIndex(){
         return currentIndex == frames.size() - 1;
+
+    }
+
+    public void fill(){
+        currentPanel.fill();
     }
 
     public void colorSelector(){

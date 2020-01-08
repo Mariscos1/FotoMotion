@@ -79,7 +79,6 @@ public class Notepad extends JFrame {
         // pack the current JFrame to get preferred sizes and then make visible
         pack();
         setVisible(true);
-        setResizable(false);
 
         anim.initDrawPanel();
         panelsGrouper.add(addPanel());
@@ -234,6 +233,10 @@ public class Notepad extends JFrame {
             }
         });
 
+        JButton fillButton = new JButton("Bucket");
+        fillButton.addActionListener(e -> fill());
+        fillButton.setPreferredSize(VER_BUTTON_DIMENSION);
+
         JButton colorSelector = new JButton("Color Select");
         colorSelector.addActionListener(e -> colorSelector());
         colorButton.setPreferredSize(VER_BUTTON_DIMENSION);
@@ -302,6 +305,8 @@ public class Notepad extends JFrame {
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
+//        verRibbon.add(fillButton, gbc);
+//        gbc.gridy++;
         verRibbon.add(colorSelector, gbc);
         gbc.gridy++;
         verRibbon.add(colorButton, gbc);
@@ -324,7 +329,7 @@ public class Notepad extends JFrame {
         addButtonSet(clearPage, clearAll, verRibbon, gbc);
 
         //padding to move all the components to the top
-        addDud(4, verRibbon, gbc);
+        addDud(3, verRibbon, gbc);
     }
 
     private void addDud(int amount, JPanel panel, GridBagConstraints gbc) {
@@ -433,6 +438,10 @@ public class Notepad extends JFrame {
         animateRibbon.add(frameGrouper);
         animateRibbon.add(animGrouper);
         animateRibbon.add(windowPain);
+    }
+
+    private void fill(){
+        anim.fill();
     }
 
     private void colorSelector() {

@@ -34,6 +34,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     // show shadow of previous slide
     private boolean showShadow;
     private boolean colorSelecting;
+    private boolean filling;
 
     // buffers
     private Graphics2D g2BackBuffer;
@@ -156,7 +157,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void mousePressed(MouseEvent e) {
         mousePressed = true;
 
-        if(!colorSelecting) {
+        if (!colorSelecting && !filling) {
             //gets begin point for mouseDragged shape
             oldX = e.getX();
             oldY = e.getY();
@@ -172,7 +173,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if(!colorSelecting) {
+        if (!colorSelecting && !filling) {
             // g2.setStroke(new BasicStroke(strokeSize));
             g2BackBuffer.setStroke(new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -193,13 +194,15 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     public void mouseReleased(MouseEvent e) {
         mousePressed = false;
 
-        if(!colorSelecting) {
+        if (!colorSelecting && !filling) {
             Image copy = deepCopy(backBuffer);
             undoStack.push(copy);
 
             if (!redoStack.isEmpty())
                 redoStack.clear();
-        }else{
+        } else {
+
+
             BufferedImage image;
             if (backBuffer instanceof VolatileImage) {
                 image = ((VolatileImage) backBuffer).getSnapshot();
@@ -209,12 +212,55 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
                 throw new IllegalArgumentException("Fuck");
             }
 
-            currentColor = new Color(image.getRGB(e.getX(), e.getY()));
-            colorSelecting = false;
+            int x = e.getX();
+            int y = e.getY();
 
-            oldX = e.getX();
-            oldY = e.getX();
+            if (colorSelecting) {
+
+                currentColor = new Color(image.getRGB(x, y));
+                colorSelecting = false;
+
+                oldX = e.getX();
+                oldY = e.getX();
+            } else if (filling) {
+                filling = false;
+                g2BackBuffer.setColor(brushColor);
+                fillAll(x, y, new Color(image.getRGB(x, y)));
+                repaint();
+            }
         }
+    }
+
+    private void fillAll(int x, int y, Color color) {
+
+        g2BackBuffer.fillRect(x, y, 10, 10);
+        repaint();
+
+        int width = backBuffer.getWidth(null);
+        int height = backBuffer.getWidth(null);
+
+
+
+        if (x > 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x -10 , y)).equals(color)) {
+            fillAll(x - 10, y, color);
+        }
+
+
+        if (x < width- 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x +10 , y)).equals(brushColor)) {
+            fillAll(x + 10, y, color);
+        }
+
+        if (y > 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x , y - 10)).equals(color)) {
+            fillAll(x, y - 10, color);
+        }
+
+        if (y < height - 11 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x , y + 10)).equals(color)) {
+            fillAll(x, y + 10, color);
+        }
+
+
+
+
     }
 
     @Override
@@ -336,10 +382,13 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
      * Methods to implement
      */
 
-    public void colorSelector(){
+    public void colorSelector() {
         colorSelecting = true;
     }
 
+    public void fill() {
+        filling = true;
+    }
 
     public Image undo() {
 
