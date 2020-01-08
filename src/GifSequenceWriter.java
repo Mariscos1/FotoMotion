@@ -35,40 +35,25 @@ import java.util.Iterator;
             // my method to create a writer
             gifWriter = getWriter();
             imageWriteParam = gifWriter.getDefaultWriteParam();
-            ImageTypeSpecifier imageTypeSpecifier =
-                    ImageTypeSpecifier.createFromBufferedImageType(imageType);
+            ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(imageType);
 
-            imageMetaData =
-                    gifWriter.getDefaultImageMetadata(imageTypeSpecifier,
-                            imageWriteParam);
+            imageMetaData = gifWriter.getDefaultImageMetadata(imageTypeSpecifier, imageWriteParam);
 
             String metaFormatName = imageMetaData.getNativeMetadataFormatName();
 
-            IIOMetadataNode root = (IIOMetadataNode)
-                    imageMetaData.getAsTree(metaFormatName);
+            IIOMetadataNode root = (IIOMetadataNode) imageMetaData.getAsTree(metaFormatName);
 
-            IIOMetadataNode graphicsControlExtensionNode = getNode(
-                    root,
-                    "GraphicControlExtension");
+            IIOMetadataNode graphicsControlExtensionNode = getNode(root, "GraphicControlExtension");
 
             graphicsControlExtensionNode.setAttribute("disposalMethod", "none");
             graphicsControlExtensionNode.setAttribute("userInputFlag", "FALSE");
-            graphicsControlExtensionNode.setAttribute(
-                    "transparentColorFlag",
-                    "FALSE");
-            graphicsControlExtensionNode.setAttribute(
-                    "delayTime",
-                    Integer.toString(timeBetweenFramesMS / 10));
-            graphicsControlExtensionNode.setAttribute(
-                    "transparentColorIndex",
-                    "0");
+            graphicsControlExtensionNode.setAttribute("transparentColorFlag", "FALSE");
+            graphicsControlExtensionNode.setAttribute("delayTime", Integer.toString(timeBetweenFramesMS / 10));
+            graphicsControlExtensionNode.setAttribute("transparentColorIndex", "0");
 
             IIOMetadataNode commentsNode = getNode(root, "CommentExtensions");
             commentsNode.setAttribute("CommentExtension", "Created by MAH");
-
-            IIOMetadataNode appEntensionsNode = getNode(
-                    root,
-                    "ApplicationExtensions");
+            IIOMetadataNode appEntensionsNode = getNode(root, "ApplicationExtensions");
 
             IIOMetadataNode child = new IIOMetadataNode("ApplicationExtension");
 
@@ -77,8 +62,7 @@ import java.util.Iterator;
 
             int loop = loopContinuously ? 0 : 1;
 
-            child.setUserObject(new byte[]{ 0x1, (byte) (loop & 0xFF), (byte)
-                    ((loop >> 8) & 0xFF)});
+            child.setUserObject(new byte[]{ 0x1, (byte) (loop & 0xFF), (byte) ((loop >> 8) & 0xFF)});
             appEntensionsNode.appendChild(child);
 
             imageMetaData.setFromTree(metaFormatName, root);
@@ -130,51 +114,12 @@ import java.util.Iterator;
                 String nodeName) {
             int nNodes = rootNode.getLength();
             for (int i = 0; i < nNodes; i++) {
-                if (rootNode.item(i).getNodeName().compareToIgnoreCase(nodeName)
-                        == 0) {
+                if (rootNode.item(i).getNodeName().compareToIgnoreCase(nodeName) == 0) {
                     return((IIOMetadataNode) rootNode.item(i));
                 }
             }
             IIOMetadataNode node = new IIOMetadataNode(nodeName);
             rootNode.appendChild(node);
             return(node);
-        }
-
-        /**
-         public GifSequenceWriter(
-         BufferedOutputStream outputStream,
-         int imageType,
-         int timeBetweenFramesMS,
-         boolean loopContinuously) {
-
-         */
-
-        public static void main(String[] args) throws Exception {
-            if (args.length > 1) {
-                // grab the output image type from the first image in the sequence
-                BufferedImage firstImage = ImageIO.read(new File(args[0]));
-
-                // create a new BufferedOutputStream with the last argument
-                ImageOutputStream output =
-                        new FileImageOutputStream(new File(args[args.length - 1]));
-
-                // create a gif sequence with the type of the first image, 1 second
-                // between frames, which loops continuously
-                GifSequenceWriter writer =
-                        new GifSequenceWriter(output, firstImage.getType(), 1, false);
-
-                // write out the first image to our sequence...
-                writer.writeToSequence(firstImage);
-                for(int i=1; i<args.length-1; i++) {
-                    BufferedImage nextImage = ImageIO.read(new File(args[i]));
-                    writer.writeToSequence(nextImage);
-                }
-
-                writer.close();
-                output.close();
-            } else {
-                System.out.println(
-                        "Usage: java GifSequenceWriter [list of gif files] [output file]");
-            }
         }
     }

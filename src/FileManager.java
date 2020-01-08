@@ -1,5 +1,8 @@
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.*;
@@ -7,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.rmi.server.ExportException;
 
@@ -25,6 +29,7 @@ public class FileManager {
 
     //Actual pop-up that allows for directory search
     private static JFileChooser directory = new JFileChooser();
+    private static ImageReader reader = ImageIO.getImageReadersBySuffix("gif").next();
 
     //Sets up the information for the File Chooser, such as the directories ur allowed to use, like how Karen used me
     static {
@@ -33,7 +38,7 @@ public class FileManager {
 
         directory.setDialogTitle("I'm sorry karen, i'm good at cornhole, give me the kidz");
         //Allows us to only access the directory and not the actual folder so there can't be any accidental overwrites
-        directory.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        directory.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     }
 
     public static Image getImage(String pathName) {
@@ -74,8 +79,27 @@ public class FileManager {
     }
 
 
-    public static void open() {
+    public synchronized static List<Image> open(Component parent) {
+        String pathway = "";
+        List<Image> newGifFrames = new ArrayList<>();
+        if(directory.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            //Gets the pathway of the gif that we are trying to dankify
+            pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
+        }
+        try {
+            ImageInputStream input = ImageIO.createImageInputStream(new File(pathway));
+            reader.setInput(input);
 
+            int count = reader.getNumImages(true);
+
+            for(int i = 0; i < count; i++){
+                newGifFrames.add(reader.read(i));
+            }
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return newGifFrames;
     }
 
     public static void export() {

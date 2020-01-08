@@ -40,7 +40,7 @@ public class Notepad extends JFrame {
         setTitle(APP_NAME);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // setResizable(false);
+        setResizable(true);
         setLayout(new BorderLayout());
 
         // create a navigation bar for the frame
@@ -98,7 +98,7 @@ public class Notepad extends JFrame {
         // show pop up dialog pop boxes saying that functionality is not ready yet
         save.addActionListener(e -> anim.save(save));
         saveAss.addActionListener(e -> anim.saveAs(saveAss));
-        open.addActionListener(e -> Notepad.showErrorMessage("Open has not been implemented"));
+        open.addActionListener(e -> anim.open(open));
 
         save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));

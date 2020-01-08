@@ -351,4 +351,17 @@ public class AnimationPanel extends JPanel {
             System.out.println("no hetero");
         }
     }
+
+    public void open(Component open) {
+        List<Image> newFrames_Iamcool = FileManager.open(open);
+        removeAllPanels();
+
+        for(int i = 0; i < newFrames_Iamcool.size(); i++) {
+            currentPanel.setImage(newFrames_Iamcool.get(i), true);
+            addPanel();
+        }
+
+        removePanel();
+        setCurrentFrame(0);
+    }
 }
