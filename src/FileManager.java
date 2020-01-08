@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,19 +87,35 @@ public class FileManager {
             //Gets the pathway of the gif that we are trying to dankify
             pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
         }
+
         try {
-            ImageInputStream input = ImageIO.createImageInputStream(new File(pathway));
-            reader.setInput(input);
 
-            int count = reader.getNumImages(true);
+            final FileInputStream data = new FileInputStream(pathway);
+            final GifDecoder.GifImage gif = GifDecoder.read(data);
 
-            for(int i = 0; i < count; i++){
-                newGifFrames.add(reader.read(i));
+            int frames = gif.getFrameCount();
+
+            for (int i = 0; i < frames; i++) {
+                newGifFrames.add(gif.getFrame(i));
             }
 
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        try {
+//            ImageInputStream input = ImageIO.createImageInputStream(new File(pathway));
+//            reader.setInput(input);
+//
+//            int count = reader.getNumImages(true);
+//
+//            for(int i = 0; i < count; i++){
+//                newGifFrames.add(deepCopy(reader.read(i)));
+//            }
+//
+//        } catch(Exception e){
+//            e.printStackTrace();
+//        }
         return newGifFrames;
     }
 
