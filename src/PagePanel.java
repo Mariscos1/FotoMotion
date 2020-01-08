@@ -22,6 +22,8 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     private final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
     private final float SHADOW_TRANSPARENCY = .25f; // should be from [0, 1] where 0 is opaque
 
+    private int counter;
+
     // instance variables
 
     // brush and colors
@@ -223,44 +225,33 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
                 oldX = e.getX();
                 oldY = e.getX();
             } else if (filling) {
-                filling = false;
                 g2BackBuffer.setColor(brushColor);
-                fillAll(x, y, new Color(image.getRGB(x, y)));
+                fillAll(image, x, y, new Color(image.getRGB(x, y)), x, y);
                 repaint();
+                counter = 0;
             }
         }
     }
 
-    private void fillAll(int x, int y, Color color) {
-
-        g2BackBuffer.fillRect(x, y, 10, 10);
-        repaint();
-
-        int width = backBuffer.getWidth(null);
-        int height = backBuffer.getWidth(null);
+    private void fillAll(BufferedImage image, int x, int y, Color oldColor, int startX, int startY) {
+        if (counter++ > 9000 || Math.abs(startX - x) > 35 || Math.abs(startY - y) > 35
+                || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight())
+            return;
 
 
+        if (image.getRGB(x, y) != oldColor.getRGB())
+            return;
 
-        if (x > 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x -10 , y)).equals(color)) {
-            fillAll(x - 10, y, color);
-        }
-
-
-        if (x < width- 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x +10 , y)).equals(brushColor)) {
-            fillAll(x + 10, y, color);
-        }
-
-        if (y > 10 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x , y - 10)).equals(color)) {
-            fillAll(x, y - 10, color);
-        }
-
-        if (y < height - 11 && new Color(((VolatileImage) backBuffer).getSnapshot().getRGB(x , y + 10)).equals(color)) {
-            fillAll(x, y + 10, color);
-        }
+        image.setRGB(x, y, brushColor.getRGB());
+        g2BackBuffer.fillRect(x, y, 2, 2);
 
 
 
 
+        fillAll(image, x + 1, y, oldColor, startX, startY);
+        fillAll(image, x, y + 1, oldColor, startX, startY);
+        fillAll(image, x - 1, y, oldColor, startX, startY);
+        fillAll(image, x, y - 1, oldColor, startX, startY);
     }
 
     @Override
@@ -387,7 +378,7 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     public void fill() {
-        filling = true;
+        filling = !filling;
     }
 
     public Image undo() {

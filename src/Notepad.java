@@ -305,8 +305,8 @@ public class Notepad extends JFrame {
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
-//        verRibbon.add(fillButton, gbc);
-//        gbc.gridy++;
+        verRibbon.add(fillButton, gbc);
+        gbc.gridy++;
         verRibbon.add(colorSelector, gbc);
         gbc.gridy++;
         verRibbon.add(colorButton, gbc);
