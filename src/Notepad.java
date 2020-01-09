@@ -233,7 +233,7 @@ public class Notepad extends JFrame {
             }
         });
 
-        JButton fillButton = new JButton("Bucket");
+        JButton fillButton = new JButton("Fill Bucket");
         fillButton.addActionListener(e -> fill());
         fillButton.setPreferredSize(VER_BUTTON_DIMENSION);
 
