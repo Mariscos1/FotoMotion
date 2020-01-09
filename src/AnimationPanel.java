@@ -358,15 +358,19 @@ public class AnimationPanel extends JPanel {
     }
 
     public void open(Component open) {
+
         List<Image> newFrames_Iamcool = FileManager.open(open);
-        removeAllPanels();
 
-        for(int i = 0; i < newFrames_Iamcool.size(); i++) {
-            currentPanel.setImage(newFrames_Iamcool.get(i), true);
-            addPanel();
+        if(newFrames_Iamcool != null) {
+            removeAllPanels();
+
+            for (int i = 0; i < newFrames_Iamcool.size(); i++) {
+                currentPanel.setImage(newFrames_Iamcool.get(i), true);
+                addPanel();
+            }
+
+            removePanel();
+            setCurrentFrame(0);
         }
-
-        removePanel();
-        setCurrentFrame(0);
     }
 }

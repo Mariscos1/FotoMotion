@@ -1,6 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -8,9 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.rmi.server.ExportException;
@@ -70,7 +69,7 @@ public class FileManager {
 
             } else {
                 //Shown whenever the person decides not to save their frame
-                Notepad.showErrorMessage("You dumbass. You didn't save DUMBASS.");
+                showErrorMessage("You dumbass. You didn't save DUMBASS.");
             }
 
         } catch(Exception e){
@@ -86,36 +85,46 @@ public class FileManager {
         if(directory.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
             //Gets the pathway of the gif that we are trying to dankify
             pathway = directory.getSelectedFile().getAbsolutePath() + pathway;
-        }
 
-        try {
+            try {
+                //The first one is the one that connects the chosen GIF to the inputstream and the second one is someone who gave us this for free on the internet
+                final FileInputStream data = new FileInputStream(pathway);
+                final GifDecoder.GifImage gif = GifDecoder.read(data);
 
-            final FileInputStream data = new FileInputStream(pathway);
-            final GifDecoder.GifImage gif = GifDecoder.read(data);
+                //Gets the amount of frames that are included in the gif
+                int frames = gif.getFrameCount();
 
-            int frames = gif.getFrameCount();
+                //puts all the frames inside of a array list
+                for (int i = 0; i < frames; i++) {
+                    newGifFrames.add(gif.getFrame(i));
+                }
 
-            for (int i = 0; i < frames; i++) {
-                newGifFrames.add(gif.getFrame(i));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            //Proceeds to till the people the truth
+        } else {
+            showErrorMessage("Imagine not being a heterosexual, could be you, dumbass, call me though");
+            return null;
         }
 
+
 //        try {
-//            ImageInputStream input = ImageIO.createImageInputStream(new File(pathway));
-//            reader.setInput(input);
+//            ImageInputStream tempStream = new FileImageInputStream(output);
+//            reader.setInput(tempStream);
 //
 //            int count = reader.getNumImages(true);
 //
 //            for(int i = 0; i < count; i++){
-//                newGifFrames.add(deepCopy(reader.read(i)));
+//                newGifFrames.add(reader.read(i));
 //            }
 //
 //        } catch(Exception e){
 //            e.printStackTrace();
 //        }
+
+        //Returns the stiknin array list that is what i h8 most about this world
         return newGifFrames;
     }
 
@@ -145,14 +154,20 @@ public class FileManager {
                 writer.close();
                 output.close();
             } else{
-                Notepad.showErrorMessage("Dumbass make more than one slide, fucking idiot *sigh*");
+                showErrorMessage("Dumbass make more than one slide, fucking idiot *sigh*");
             }
+        } else {
+            showErrorMessage("Seriously. My dad knows how to save and he's 69696969 years old.");
         }
     }
 
     //Helper method for the save method that allows the user to know that their work has been saved
     private static void saveComplete(String message){
         JOptionPane.showMessageDialog(null, message, "The TRUTH", JOptionPane.QUESTION_MESSAGE);
+    }
+
+    public static void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
     }
 
     //Helper method that helps convert the images sent as a parameter to a BufferedImage Type, then proceeds to return the Buff Image #GAINZ

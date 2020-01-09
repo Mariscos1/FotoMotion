@@ -523,8 +523,4 @@ public class Notepad extends JFrame {
         anim.setCurrentFrame(newIndex);
         repaintAll();
     }
-
-    public static void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
-    }
 }
