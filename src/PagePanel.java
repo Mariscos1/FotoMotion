@@ -234,24 +234,32 @@ public class PagePanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     private void fillAll(BufferedImage image, int x, int y, Color oldColor, int startX, int startY) {
-        if (counter++ > 9000 || Math.abs(startX - x) > 35 || Math.abs(startY - y) > 35
+        if (counter++ > 10000 || Math.abs(startX - x) > 70 || Math.abs(startY - y) > 70
                 || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight())
             return;
+
 
 
         if (image.getRGB(x, y) != oldColor.getRGB())
             return;
 
-        image.setRGB(x, y, brushColor.getRGB());
-        g2BackBuffer.fillRect(x, y, 2, 2);
+        setSquareRGB(image, x, y);
+        g2BackBuffer.fillRect(x, y, 3, 3);
 
+        int factor = 2;
+        fillAll(image, x + factor, y, oldColor, startX, startY);
+        fillAll(image, x, y + factor, oldColor, startX, startY);
+        fillAll(image, x - factor, y, oldColor, startX, startY);
+        fillAll(image, x, y - factor, oldColor, startX, startY);
+    }
 
-
-
-        fillAll(image, x + 1, y, oldColor, startX, startY);
-        fillAll(image, x, y + 1, oldColor, startX, startY);
-        fillAll(image, x - 1, y, oldColor, startX, startY);
-        fillAll(image, x, y - 1, oldColor, startX, startY);
+    public void setSquareRGB(BufferedImage image, int x, int y) {
+        for (int i = -1; i < 1; i++) {
+            for (int j = -1; j < 1; j++) {
+                if (x > 0 && x < image.getWidth() && y > 0 && y < image.getHeight())
+                    image.setRGB(x + i, y + j, brushColor.getRGB());
+            }
+        }
     }
 
     @Override
