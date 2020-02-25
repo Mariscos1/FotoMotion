@@ -69,7 +69,7 @@ public class FileManager {
 
             } else {
                 //Shown whenever the person decides not to save their frame
-                showErrorMessage("You dumbass. You didn't save DUMBASS.");
+                showErrorMessage("Bro, it didn't save, honestly man you go back to school so you can do something with your life");
             }
 
         } catch(Exception e){
@@ -105,7 +105,7 @@ public class FileManager {
 
             //Proceeds to till the people the truth
         } else {
-            showErrorMessage("Imagine not being a heterosexual, could be you, dumbass, call me though");
+            showErrorMessage("Imagine not knowing what you want to do with your life, could be you");
             return null;
         }
 
@@ -154,10 +154,10 @@ public class FileManager {
                 writer.close();
                 output.close();
             } else{
-                showErrorMessage("Dumbass make more than one slide, fucking idiot *sigh*");
+                showErrorMessage("Idiot make more than one slide, this would only be a still image *sigh*");
             }
         } else {
-            showErrorMessage("Seriously. My dad knows how to save and he's 69696969 years old.");
+            showErrorMessage("Seriously. how could you have made it this far and realize you didn't want to save");
         }
     }
 
@@ -178,7 +178,7 @@ public class FileManager {
         } else if (currentImage instanceof VolatileImage) {
             temp = ((VolatileImage) currentImage).getSnapshot();
         } else  {
-            throw new IllegalArgumentException("gay please");
+            throw new IllegalArgumentException("You definitely messed up because this error should like never be reached man");
         }
         return temp;
     }
